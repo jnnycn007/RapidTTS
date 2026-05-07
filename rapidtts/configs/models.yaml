@@ -1,0 +1,18 @@
+melo_onnx:
+  base_url: https://www.modelscope.cn/models/RapidAI/RapidTTS/resolve/master/models/melotts/onnx
+  local_dir: models/melotts_zh_mix_en_onnx
+  files:
+    - name: bert_lml_model.onnx
+      sha256: f68cddf7535c4df992933b9c7ac676a97f18ad5af3d7690f1255566da8261720
+    - name: cmudict_cache.pickle
+      sha256: b9b21b20325471934ba92f2e4a5976989e7d920caa32e7a286eacb027d197949
+    - name: configuration.json
+      sha256: 8252f3b1c2399e5a42d17155f594208b3909e60807669504e3ebe05516bfd79c
+    - name: opencpop-strict.txt
+      sha256: 86c4b30928e3a4305c9148058c9e2e56b04ce741363fedff382421f4a1e3709d
+    - name: tokenizer.json
+      sha256: 41a9e8ccfd02a7bf5bb8426ed22eec3a5bd81d85d7c10ef4a5cbdbfa21faa21b
+    - name: tts_model.onnx
+      sha256: ecfe270a3c9b31f8182d23c4652ba4f18615a8eb5b968bc43836dcdf2c6ae28b
+    - name: vocab.txt
+      sha256: 87b44292b452f6c05afa49b2e488e7eedf79ea4f4c39db6f2f4b37764228ef3f

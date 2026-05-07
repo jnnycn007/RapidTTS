@@ -1,0 +1,16 @@
+global:
+  backend: melo_onnx
+
+melo_onnx:
+  init:
+    model_root_dir: models/melotts_zh_mix_en_onnx
+    device: cpu
+
+  request:
+    language: ZH_MIX_EN
+    speed: 1.0
+    sample_rate: 44100
+    audio_format: wav
+    sdp_ratio: 0.2
+    noise_scale: 0.6
+    noise_scale_w: 0.8
