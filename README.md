@@ -30,8 +30,6 @@ cd RapidTTS
 pip install -e .
 ```
 
-RapidTTS 需要 Python 3.10 或更高版本。
-
 ## 快速使用
 
 命令行合成：
