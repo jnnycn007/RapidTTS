@@ -48,17 +48,6 @@ resp = tts.synthesize(SynthesisRequest(text="你好，RapidTTS"))
 resp.save("outputs/1.wav")
 ```
 
-## 效果试听
-
-| 示例文本 | 音频 |
-| --- | --- |
-| 请播报车牌号码：京 A86F29，其中“京”读作北京的京，字母 F 读作英文字母 F，数字逐位清晰播报。| [试听](docs/assets/melotts-zh-en-00.mp3) |
-| 今天的 meeting 改到下午 three thirty，请提醒 Alex 别忘了带合同。| [试听](docs/assets/melotts-zh-en-01.mp3) |
-| 我刚下载了一个 app，名字叫 TimeBridge，可以自动同步 Beijing time 和 Pacific time。| [试听](docs/assets/melotts-zh-en-02.mp3) |
-| 这个 presentation 的重点不是 revenue growth，而是 customer retention 和 long-term trust。| [试听](docs/assets/melotts-zh-en-03.mp3) |
-| 请把“深度学习模型”翻译成 deep learning model，再用 natural voice 读出来。| [试听](docs/assets/melotts-zh-en-04.mp3) |
-| 她说：“I’ll be there in ten minutes.” 但其实她还在地铁站排队买 coffee。| [试听](docs/assets/melotts-zh-en-05.mp3) |
-
 ## 文档
 
 - [安装说明](docs/installation.md)
