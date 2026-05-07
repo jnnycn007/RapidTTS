@@ -14,6 +14,7 @@ cur_dir = Path(__file__).parent.resolve()
 sys.path.append(str(cur_dir.parent))
 
 from rapidtts.backends.melo_onnx.backend import MeloONNXBackend
+from rapidtts.backends.melo_onnx.kernel.chinese_mix_en_kernel import ChineseMixEnKernel
 from rapidtts.backends.melo_onnx.model import MeloONNXModel
 from rapidtts.backends.melo_onnx.postprocess import MeloONNXPostprocessor
 from rapidtts.backends.melo_onnx.typings import MeloONNXInput
@@ -176,6 +177,13 @@ def test_backend_preprocess_sets_default_language_and_returns_inputs() -> None:
     assert result == preprocessor.output
     assert preprocessor.seen_request is request
     assert request.language == "ZH_MIX_EN"
+
+
+def test_chinese_segment_processing_removes_spaces_around_english() -> None:
+    kernel = ChineseMixEnKernel.__new__(ChineseMixEnKernel)
+
+    assert kernel.process_seg("改到下午 ") == "改到下午"
+    assert kernel.process_seg(" API ") == ""
 
 
 def test_backend_infer_delegates_inputs_to_model() -> None:

@@ -184,7 +184,7 @@ class ChineseMixEnKernel(AbstractKernel):
         return phones_list, tones_list, word2ph
 
     def process_seg(self, seg):
-        return re.sub("[a-zA-Z]+", "", seg)
+        return re.sub(r"[a-zA-Z\s]+", "", seg)
 
     def process_cv(self, c, v, seg):
         raw_pinyin = c + v
