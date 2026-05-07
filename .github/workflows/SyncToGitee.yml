@@ -1,22 +1,29 @@
-name: syncToGitee
+name: Sync RapidTTS to Gitee
+
 on:
   push:
     branches:
       - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
 jobs:
-  repo-sync:
+  sync:
+    name: Sync RapidTTS
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout source codes
-        uses: actions/checkout@v2
-  
-      - name: Mirror the Github organization repos to Gitee.
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Sync RapidTTS to Gitee
         uses: Yikun/hub-mirror-action@master
         with:
-          src: 'github/RapidAI'
-          dst: 'gitee/RapidAI'
+          src: github/RapidAI
+          dst: gitee/RapidAI
+          static_list: RapidTTS
           dst_key: ${{ secrets.GITEE_PRIVATE_KEY }}
-          dst_token:  ${{ secrets.GITEE_TOKEN }}
+          dst_token: ${{ secrets.GITEE_TOKEN }}
           force_update: true
-          debug: true
-  
