@@ -6,6 +6,7 @@ outputs/
 outputs
 tmp/
 tmp
+models/
 
 temp/
 .DS_Store
