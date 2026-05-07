@@ -1,0 +1,27 @@
+repos:
+- repo: https://gitee.com/SWHL/autoflake
+  rev: v2.1.1
+  hooks:
+    - id: autoflake
+      args:
+        [
+          "--recursive",
+          "--in-place",
+          "--remove-all-unused-imports",
+          "--remove-unused-variable",
+          "--ignore-init-module-imports",
+        ]
+- repo: http://opsgit.arkgames.com/skyreels/videocontrol/data_preprocess/pre-commit/black
+  rev: 25.1.0
+  hooks:
+    - id: black
+      args:
+        [
+          "--line-length",
+          "88"
+        ]
+- repo: http://opsgit.arkgames.com/skyreels/videocontrol/data_preprocess/pre-commit/isort
+  rev: 6.0.1
+  hooks:
+    - id: isort
+      args: [--profile, black]  # 可选：如果你使用 Black 格式化工具，可以添加此参数以保持一致的格式
