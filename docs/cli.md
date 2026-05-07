@@ -2,34 +2,30 @@
 
 RapidTTS 安装后会提供 `rapidtts` 命令。
 
-## 文本合成
+## 命令速查
 
 ```bash
-rapidtts text "你好，RapidTTS" outputs/1.wav
+rapidtts download [melo_onnx] [--save-dir DIR] [--no-progress] [--quiet]
+rapidtts check [melo_onnx] [--model-dir DIR] [--init-backend] [--quiet]
+rapidtts text TEXT OUTPUT [--model melo_onnx] [--model-dir DIR] [--language ZH|EN|ZH_MIX_EN] [--speed SPEED] [--sample-rate SAMPLE_RATE] [--quiet]
 ```
 
-指定语言：
+## 检查安装
 
 ```bash
-rapidtts text "hello world" outputs/en.wav --language EN
+rapidtts check
 ```
 
-指定语速和采样率：
+检查自定义模型目录：
 
 ```bash
-rapidtts text "你好，RapidTTS" outputs/1.wav --speed 1.2 --sample-rate 16000
+rapidtts check melo_onnx --model-dir /path/to/melotts_zh_mix_en_onnx
 ```
 
-使用自定义模型目录：
+同时初始化后端：
 
 ```bash
-rapidtts text "你好，RapidTTS" outputs/1.wav --model-dir /path/to/melotts_zh_mix_en_onnx
-```
-
-关闭 RapidTTS 日志：
-
-```bash
-rapidtts text "你好，RapidTTS" outputs/1.wav --quiet
+rapidtts check --init-backend
 ```
 
 ## 下载模型
@@ -58,28 +54,32 @@ rapidtts download melo_onnx --no-progress
 rapidtts download melo_onnx --quiet
 ```
 
-## 检查安装
+## 文本合成
 
 ```bash
-rapidtts check
+rapidtts text "你好，RapidTTS" outputs/1.wav
 ```
 
-检查自定义模型目录：
+指定语言：
 
 ```bash
-rapidtts check melo_onnx --model-dir /path/to/melotts_zh_mix_en_onnx
+rapidtts text "hello world" outputs/en.wav --language EN
 ```
 
-同时初始化后端：
+指定语速和采样率：
 
 ```bash
-rapidtts check --init-backend
+rapidtts text "你好，RapidTTS" outputs/1.wav --speed 1.2 --sample-rate 16000
 ```
 
-## 命令速查
+使用自定义模型目录：
 
 ```bash
-rapidtts download [melo_onnx] [--save-dir DIR] [--no-progress] [--quiet]
-rapidtts check [melo_onnx] [--model-dir DIR] [--init-backend] [--quiet]
-rapidtts text TEXT OUTPUT [--model melo_onnx] [--model-dir DIR] [--language ZH|EN|ZH_MIX_EN] [--speed SPEED] [--sample-rate SAMPLE_RATE] [--quiet]
+rapidtts text "你好，RapidTTS" outputs/1.wav --model-dir /path/to/melotts_zh_mix_en_onnx
+```
+
+关闭 RapidTTS 日志：
+
+```bash
+rapidtts text "你好，RapidTTS" outputs/1.wav --quiet
 ```

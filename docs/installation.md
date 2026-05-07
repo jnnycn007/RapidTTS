@@ -1,19 +1,9 @@
 # 安装说明
 
-RapidTTS 需要 Python 3.10 或更高版本。
-
 ## 从源码安装
 
 ```bash
-git clone https://github.com/RapidAI/RapidTTS.git
-cd RapidTTS
-pip install -e .
-```
-
-## 开发环境安装依赖
-
-```bash
-pip install -r requirements.txt
+pip install rapidtts
 ```
 
 ## 检查安装
