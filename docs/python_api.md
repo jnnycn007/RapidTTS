@@ -13,7 +13,7 @@ resp = tts.synthesize(
     )
 )
 
-resp.save("outputs/result.wav")
+resp.save("result.wav")
 ```
 
 ## 指定模型目录
