@@ -10,7 +10,7 @@ from ...common.errors import BackendNotLoadedError
 from ...core.backend import BaseTTSBackend
 from ...core.request import SynthesisRequest
 from ...core.response import SynthesisResponse
-from ...core.typings import TTSLanguage
+from ...core.typings import TextNormalizerType, TTSLanguage
 from .model import MeloONNXConfig, MeloONNXModel
 from .postprocess import MeloONNXPostprocessor
 from .preprocess import MeloONNXPreprocessor
@@ -23,6 +23,7 @@ class MeloONNXBackend(BaseTTSBackend):
         model_root_dir: Union[str, Path],
         device: str = "cpu",
         request_defaults: Optional[Dict[str, Any]] = None,
+        text_normalizer_type: str = "legacy",
     ) -> None:
         self.request_defaults = request_defaults or {}
 
@@ -32,7 +33,10 @@ class MeloONNXBackend(BaseTTSBackend):
             MeloONNXConfig(model_path=str(tts_model_path), device=device)
         )
 
-        self.preprocessor = MeloONNXPreprocessor(self.model_root_dir)
+        self.preprocessor = MeloONNXPreprocessor(
+            self.model_root_dir,
+            text_normalizer_type=TextNormalizerType(text_normalizer_type),
+        )
         self.postprocessor = MeloONNXPostprocessor()
 
     def infer(self, model_inputs: list[MeloONNXInput]) -> list[np.ndarray]:

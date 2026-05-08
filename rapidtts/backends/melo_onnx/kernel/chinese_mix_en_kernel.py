@@ -11,6 +11,8 @@ import jieba.posseg as psg
 from pypinyin import Style, lazy_pinyin
 from tokenizers import Tokenizer
 
+from ....common.text.normalization import create_text_normalizer
+from ....core.typings import TextNormalizerType
 from .abstract_kernel import AbstractKernel
 from .bert_infer import BertInfer
 from .english_kernel import EnglishKernel
@@ -77,7 +79,13 @@ SINGLE_INITIAL_REPLACEMENTS = {
 
 
 class ChineseMixEnKernel(AbstractKernel):
-    def __init__(self, model_root_dir: Path, onnx_providers: list, session_opts=None):
+    def __init__(
+        self,
+        model_root_dir: Path,
+        onnx_providers: list,
+        session_opts=None,
+        text_normalizer_type: TextNormalizerType = TextNormalizerType.LEGACY,
+    ):
         tokenizer_path = model_root_dir / "tokenizer.json"
         self.tokenizer = Tokenizer.from_file(str(tokenizer_path))
 
@@ -97,6 +105,8 @@ class ChineseMixEnKernel(AbstractKernel):
         self.punctuation = PUNCTUATION
         self.rep_map = PUNCTUATION_REPLACEMENTS
         self.rep_pattern = re.compile("|".join(re.escape(p) for p in self.rep_map))
+
+        self.text_normalizer = create_text_normalizer(text_normalizer_type)
 
     def g2p(self, text):
         pattern = r"(?<=[{0}])\s*".format("".join(self.punctuation))
@@ -227,9 +237,7 @@ class ChineseMixEnKernel(AbstractKernel):
             return phone, [int(tone)] * len_phone, [len_phone]
 
     def text_normalize(self, text):
-        numbers = re.findall(r"\d+(?:\.?\d+)?", text)
-        for number in numbers:
-            text = text.replace(number, cn2an.an2cn(number), 1)
+        text = self.text_normalizer.normalize(text)
         text = self.replace_punctuation(text)
         return text
 

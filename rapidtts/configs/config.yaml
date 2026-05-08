@@ -5,6 +5,7 @@ melo_onnx:
   init:
     model_root_dir: models/melotts_zh_mix_en_onnx
     device: cpu
+    text_normalizer_type: legacy # none, legacy, wetext
 
   request:
     language: ZH_MIX_EN

@@ -12,12 +12,17 @@ import numpy as np
 from ...common.io import load_json
 from ...common.text.split import split_sentence
 from ...core.request import SynthesisRequest
+from ...core.typings import TextNormalizerType
 from .text_utils import TextUtils
 from .typings import MeloONNXInput
 
 
 class MeloONNXPreprocessor:
-    def __init__(self, model_root_dir: Path) -> None:
+    def __init__(
+        self,
+        model_root_dir: Path,
+        text_normalizer_type: TextNormalizerType = TextNormalizerType.LEGACY,
+    ) -> None:
         config_path = model_root_dir / "configuration.json"
         self.params = load_json(config_path)
         self.symbol_to_id = {s: i for i, s in enumerate(self.params["symbols"])}
@@ -25,7 +30,11 @@ class MeloONNXPreprocessor:
         exec_providers = ["CPUExecutionProvider"]
         onnx_session_options = None
         self.text_utils = TextUtils(
-            "ZH_MIX_EN", model_root_dir, exec_providers, onnx_session_options
+            "ZH_MIX_EN",
+            model_root_dir,
+            exec_providers,
+            onnx_session_options,
+            text_normalizer_type,
         )
 
     def run(self, request: SynthesisRequest) -> List[MeloONNXInput]:
@@ -115,9 +124,9 @@ class MeloONNXPreprocessor:
             else:
                 raise NotImplementedError()
 
-        assert bert.shape[-1] == len(
-            phone
-        ), f"Bert seq len {bert.shape[-1]} != {len(phone)}"
+        assert bert.shape[-1] == len(phone), (
+            f"Bert seq len {bert.shape[-1]} != {len(phone)}"
+        )
 
         phone = np.array(phone, dtype=np.int64)
         tone = np.array(tone, dtype=np.int64)
