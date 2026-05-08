@@ -19,6 +19,12 @@ rapidtts/configs/models.yaml
 - 文件列表
 - 每个文件的 SHA256
 
+## 支持的模型和语言
+
+|模型名称|支持语言|备注|
+|:---:|:---:|:---:|
+|[MeloTTS](https://github.com/myshell-ai/MeloTTS)|ZH_MIX_EN|中英混合|
+
 ## 默认下载目录
 
 如果用户没有指定模型目录，RapidTTS 会把默认模型下载到库安装目录下：

@@ -1,8 +1,10 @@
 <div align="center">
-  <h1><b>RapidTTS</b></h1>
+  <h1><b>🎙 RapidTTS</b></h1>
   <b><font size="4"><i> 轻量级文本转语音工具，面向本地快速推理 </i></font></b>
   <div>&nbsp;</div>
 
+<a href="https://huggingface.co/spaces/RapidAI/RapidTTS" target="_blank"><img src="https://img.shields.io/badge/Hugging Face-Demo-blue?style=flat-square"></a>
+<a href="https://www.modelscope.cn/studios/RapidAI/RapidTTS/summary" target="_blank"><img src="https://img.shields.io/badge/魔搭-Demo-blue?style=flat-square"></a>
 <a href=""><img alt="Python" src="https://img.shields.io/badge/Python-%3E%3D3.9%2C%3C4-aff.svg?style=flat-square&logo=python&logoColor=white"></a>
 <a href=""><img alt="OS" src="https://img.shields.io/badge/OS-Linux%2C%20Win%2C%20Mac-pink.svg?style=flat-square"></a>
 <a href="https://pypi.org/project/rapidtts/"><img alt="PyPI" src="https://img.shields.io/pypi/v/rapidtts?style=flat-square&logo=pypi&logoColor=white&color=3775A9"></a>
