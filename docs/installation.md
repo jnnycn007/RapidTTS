@@ -1,7 +1,5 @@
 # 安装说明
 
-## 从源码安装
-
 ```bash
 pip install rapidtts
 ```
