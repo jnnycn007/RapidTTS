@@ -1,0 +1,67 @@
+[
+  {
+    "id": "date_currency_percent",
+    "text": "今天是2026-05-08，猪肉价格是￥13.5，增长6.3%",
+    "legacy": "今天是二零二六年五月八日，猪肉价格是十三点五元，增长百分之六点三"
+  },
+  {
+    "id": "license_plate_standard",
+    "text": "请播报车牌号码：京A86F29。",
+    "legacy": "请播报车牌号码：京 A 八 六 F 二 九。"
+  },
+  {
+    "id": "license_plate_new_energy",
+    "text": "新能源车牌号码是浙AD12345。",
+    "legacy": "新能源车牌号码是浙 A、D 一 二 三 四 五。"
+  },
+  {
+    "id": "order_id_and_rmb",
+    "text": "订单ID是AB20260508，金额是￥99.9。",
+    "legacy": "订单I D 是A B 二 零 二 六 零 五 零 八，金额是九十九元九角。"
+  },
+  {
+    "id": "api_http_status_code",
+    "text": "请打开API文档，然后检查HTTP请求状态码是否为200。",
+    "legacy": "请打开A P I 文档，然后检查H T T P 请求状态码是否为二 零 零。"
+  },
+  {
+    "id": "phone_number_english",
+    "text": "Please call me at 13800138000.",
+    "legacy": "Please call me at one three eight zero zero one three eight zero zero zero."
+  },
+  {
+    "id": "verification_code_english",
+    "text": "The verification code is 123456.",
+    "legacy": "The verification code is one two three four five six."
+  },
+  {
+    "id": "date_stock_percent",
+    "text": "2026-05-08当天，A股成交额增长3.2%。",
+    "legacy": "二零二六年五月八日当天，A 股成交额增长百分之三点二。"
+  },
+  {
+    "id": "cpu_percent_storage_cn",
+    "text": "CPU使用率为86.5%，内存占用为12.3GB。",
+    "legacy": "C P U 使用率为百分之八十六点五，内存占用为十二点三 G B。"
+  },
+  {
+    "id": "hyphenated_code",
+    "text": "请播报编号：CN-2026-0008。",
+    "legacy": "请播报编号：C N 二 零 二 六 零 零 零 八。"
+  },
+  {
+    "id": "cpu_percent_storage_en",
+    "text": "The CPU usage is 86.5%, and memory usage is 12.3 GB.",
+    "legacy": "The C P U usage is eighty six point five percent, and memory usage is twelve point three G B."
+  },
+  {
+    "id": "ordinal_cn",
+    "text": "第2个版本将在下午4点发布。",
+    "legacy": "第二个版本将在下午四点发布。"
+  },
+  {
+    "id": "room_and_order_number",
+    "text": "房间号是302，订单号是A10086。",
+    "legacy": "房间号是三零二，订单号是A、 一 零 零 八 六。"
+  }
+]

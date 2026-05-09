@@ -56,6 +56,7 @@ PUNCTUATION_REPLACEMENTS = {
 
 ENGLISH_SEGMENT_PATTERN = re.compile(r"^[a-zA-Z][a-zA-Z\s]*$")
 ENGLISH_TEXT_PATTERN = re.compile(r"([a-zA-Z][a-zA-Z\s]*)")
+STANDALONE_UPPERCASE_LETTER_PATTERN = re.compile(r"(?<![A-Za-z])([A-Z])(?![a-z])")
 
 FINAL_REPLACEMENTS = {
     "uei": "ui",
@@ -145,9 +146,7 @@ class ChineseMixEnKernel(AbstractKernel):
             for piece in pieces:
                 if ENGLISH_SEGMENT_PATTERN.fullmatch(piece):
                     # english
-                    tokenized_en = self.tokenizer.encode(
-                        piece, add_special_tokens=False
-                    ).tokens
+                    tokenized_en = self.tokenize_english_segment(piece)
 
                     phones_en, tones_en, word2ph_en = self.english_kernel.g2p_en(
                         pad_start_end=False, tokenized=tokenized_en
@@ -166,6 +165,19 @@ class ChineseMixEnKernel(AbstractKernel):
                 word2ph += word2ph_zh
 
         return phones_list, tones_list, word2ph
+
+    def tokenize_english_segment(self, piece):
+        tokens = []
+        pos = 0
+        for match in STANDALONE_UPPERCASE_LETTER_PATTERN.finditer(piece):
+            tokens += self.tokenizer.encode(
+                piece[pos : match.start()], add_special_tokens=False
+            ).tokens
+            tokens.append(match.group(1))
+            pos = match.end()
+
+        tokens += self.tokenizer.encode(piece[pos:], add_special_tokens=False).tokens
+        return [token for token in tokens if token.strip()]
 
     def g2p_chinese_segments(self, segments):
         phones_list = []

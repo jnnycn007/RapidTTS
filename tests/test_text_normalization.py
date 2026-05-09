@@ -1,8 +1,10 @@
 # -*- encoding: utf-8 -*-
 # @Author: SWHL
 # @Contact: liekkaskono@163.com
+import json
 import sys
 import types
+from pathlib import Path
 
 import pytest
 
@@ -15,7 +17,16 @@ from rapidtts.common.text.normalization import (
     WeTextNormalizer,
     create_text_normalizer,
 )
+from rapidtts.common.text.risk import detect_risky_tokens
 from rapidtts.core.typings import TextNormalizerType
+
+
+FIXTURES_DIR = Path(__file__).parent / "fixtures"
+
+
+def load_text_normalization_cases():
+    fixture_path = FIXTURES_DIR / "text_normalization_cases.json"
+    return json.loads(fixture_path.read_text(encoding="utf-8"))
 
 
 def test_text_normalizer_base_interface_returns_none():
@@ -59,15 +70,21 @@ def test_noop_text_normalizer_returns_input_unchanged():
         ("2026-05-08", "二零二六年五月八日"),
         ("￥13.5", "十三点五元"),
         ("6.3%", "百分之六点三"),
-        (
-            "今天是2026-05-08，猪肉价格是￥13.5，增长6.3%",
-            "今天是二零二六年五月八日，猪肉价格是十三点五元，增长百分之六点三",
-        ),
         ("增长6.3％", "增长百分之六点三"),
     ],
 )
 def test_legacy_text_normalizer_keeps_cn2an_number_behavior(text, expected):
     assert LegacyTextNormalizer().normalize(text) == expected
+
+
+@pytest.mark.parametrize(
+    "case", load_text_normalization_cases(), ids=lambda case: case["id"]
+)
+def test_legacy_text_normalizer_matches_golden_corpus(case):
+    normalized = LegacyTextNormalizer().normalize(case["text"])
+
+    assert normalized == case["legacy"]
+    assert detect_risky_tokens(normalized) == []
 
 
 def test_wetext_normalizer_delegates_to_wetext_normalizer(monkeypatch):
@@ -112,6 +129,49 @@ def test_wetext_normalizer_normalizes_four_digit_year_before_wetext(monkeypatch)
 
     assert normalizer.normalize("今天是2026年5月8日") == "今天是二零二六年5月8日"
     assert normalizer.normalize("今天是2026 年5月8日") == "今天是二零二六年5月8日"
+
+
+def test_wetext_normalizer_normalizes_license_plate_before_wetext(monkeypatch):
+    class FakeWetextNormalizer:
+        def __init__(self, **kwargs):
+            pass
+
+        def normalize(self, text):
+            return text
+
+    fake_wetext = types.SimpleNamespace(Normalizer=FakeWetextNormalizer)
+    monkeypatch.setitem(sys.modules, "wetext", fake_wetext)
+
+    normalizer = WeTextNormalizer(lang="zh")
+
+    assert (
+        normalizer.normalize("请播报车牌号码：京A86F29。")
+        == "请播报车牌号码：京 A 八 六 F 二 九。"
+    )
+    assert normalizer.normalize("车牌粤B12345") == "车牌粤 B 一 二 三 四 五"
+
+
+def test_wetext_normalizer_normalizes_uppercase_tokens_before_wetext(monkeypatch):
+    class FakeWetextNormalizer:
+        def __init__(self, **kwargs):
+            pass
+
+        def normalize(self, text):
+            return text
+
+    fake_wetext = types.SimpleNamespace(Normalizer=FakeWetextNormalizer)
+    monkeypatch.setitem(sys.modules, "wetext", fake_wetext)
+
+    normalizer = WeTextNormalizer(lang="zh")
+
+    assert (
+        normalizer.normalize("订单ID是AB20260508")
+        == "订单I D 是A B 二 零 二 六 零 五 零 八"
+    )
+    assert (
+        normalizer.normalize("请打开API文档，然后检查HTTP请求")
+        == "请打开A P I 文档，然后检查H T T P 请求"
+    )
 
 
 def test_wetext_normalizer_reports_missing_optional_dependency(monkeypatch):

@@ -15,6 +15,7 @@ sys.path.append(str(cur_dir.parent))
 
 from rapidtts.backends.melo_onnx.backend import MeloONNXBackend
 from rapidtts.backends.melo_onnx.kernel.chinese_mix_en_kernel import ChineseMixEnKernel
+from rapidtts.backends.melo_onnx.kernel.english_kernel import EnglishKernel
 from rapidtts.backends.melo_onnx.model import MeloONNXModel
 from rapidtts.backends.melo_onnx.postprocess import MeloONNXPostprocessor
 from rapidtts.backends.melo_onnx.typings import MeloONNXInput
@@ -103,6 +104,14 @@ class FakePostprocessor:
         )
 
 
+class FakeTokenizer:
+    def encode(self, text, add_special_tokens=False):
+        class Encoded:
+            tokens = text.lower().split()
+
+        return Encoded()
+
+
 class FakeSynthesisBackend(BaseTTSBackend):
     def __init__(self) -> None:
         self.seen_postprocess_speed = None
@@ -184,6 +193,35 @@ def test_chinese_segment_processing_removes_spaces_around_english() -> None:
 
     assert kernel.process_seg("改到下午 ") == "改到下午"
     assert kernel.process_seg(" API ") == ""
+
+
+def test_english_kernel_reads_uppercase_single_letters_as_letter_names() -> None:
+    kernel = EnglishKernel.__new__(EnglishKernel)
+    kernel.eng_dict = {"A": [["AH0"]]}
+
+    phones, tones, word2ph = kernel.g2p_en(
+        pad_start_end=False,
+        tokenized=["A", "D", "I"],
+    )
+
+    assert phones == ["ey", "d", "iy", "ay"]
+    assert tones == [2, 0, 2, 2]
+    assert word2ph == [1, 2, 1]
+
+
+def test_chinese_mix_en_tokenizer_preserves_standalone_uppercase_letters() -> None:
+    kernel = ChineseMixEnKernel.__new__(ChineseMixEnKernel)
+    kernel.tokenizer = FakeTokenizer()
+
+    assert kernel.tokenize_english_segment("A P I ") == ["A", "P", "I"]
+    assert kernel.tokenize_english_segment("The C P U usage") == [
+        "the",
+        "C",
+        "P",
+        "U",
+        "usage",
+    ]
+    assert kernel.tokenize_english_segment("Apple") == ["apple"]
 
 
 def test_backend_infer_delegates_inputs_to_model() -> None:
