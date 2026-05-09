@@ -8,6 +8,26 @@ import re
 from ...common.logger import logger
 from ...core.typings import TextNormalizerType
 
+YEAR_DIGIT_MAP = {
+    "0": "零",
+    "1": "一",
+    "2": "二",
+    "3": "三",
+    "4": "四",
+    "5": "五",
+    "6": "六",
+    "7": "七",
+    "8": "八",
+    "9": "九",
+}
+
+
+def normalize_year_digits(text: str) -> str:
+    def convert_year(match: re.Match) -> str:
+        return "".join(YEAR_DIGIT_MAP[digit] for digit in match.group(1)) + "年"
+
+    return re.sub(r"(?<!\d)(\d{4})年", convert_year, text)
+
 
 class TextNormalizer:
     def normalize(self, text: str) -> str:
@@ -29,6 +49,7 @@ class LegacyTextNormalizer(TextNormalizer):
             return f"{year_text}年{cn2an.an2cn(int(month))}月{cn2an.an2cn(int(day))}日"
 
         text = re.sub(r"(\d{4})-(\d{1,2})-(\d{1,2})", convert_date, text)
+        text = normalize_year_digits(text)
         text = re.sub(
             r"[￥¥]\s*(\d+(?:\.\d+)?)",
             lambda match: f"{cn2an.an2cn(match.group(1))}元",
@@ -57,6 +78,7 @@ class WeTextNormalizer(TextNormalizer):
         self.normalizer = Normalizer(lang=lang, operator="tn", remove_erhua=True)
 
     def normalize(self, text: str) -> str:
+        text = normalize_year_digits(text)
         return self.normalizer.normalize(text)
 
 

@@ -52,6 +52,16 @@ def test_noop_text_normalizer_returns_input_unchanged():
         ("价格12.5元", "价格十二点五元"),
         ("第2个版本", "第二个版本"),
         ("1个2.5元", "一个二点五元"),
+        ("2026年", "二零二六年"),
+        ("今天是2026年5月8日", "今天是二零二六年五月八日"),
+        ("2026-05-08", "二零二六年五月八日"),
+        ("￥13.5", "十三点五元"),
+        ("6.3%", "百分之六点三"),
+        (
+            "今天是2026-05-08，猪肉价格是￥13.5，增长6.3%",
+            "今天是二零二六年五月八日，猪肉价格是十三点五元，增长百分之六点三",
+        ),
+        ("增长6.3％", "增长百分之六点三"),
     ],
 )
 def test_legacy_text_normalizer_keeps_cn2an_number_behavior(text, expected):
@@ -81,8 +91,24 @@ def test_wetext_normalizer_delegates_to_wetext_normalizer(monkeypatch):
             "operator": "tn",
             "remove_erhua": True,
         },
-        "text": "今天是2024年8月8日",
+        "text": "今天是二零二四年8月8日",
     }
+
+
+def test_wetext_normalizer_normalizes_four_digit_year_before_wetext(monkeypatch):
+    class FakeWetextNormalizer:
+        def __init__(self, **kwargs):
+            pass
+
+        def normalize(self, text):
+            return text
+
+    fake_wetext = types.SimpleNamespace(Normalizer=FakeWetextNormalizer)
+    monkeypatch.setitem(sys.modules, "wetext", fake_wetext)
+
+    normalizer = WeTextNormalizer(lang="zh")
+
+    assert normalizer.normalize("今天是2026年5月8日") == "今天是二零二六年5月8日"
 
 
 def test_wetext_normalizer_reports_missing_optional_dependency(monkeypatch):
