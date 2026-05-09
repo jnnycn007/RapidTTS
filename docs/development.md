@@ -60,14 +60,16 @@ python -m pytest tests/test_text_normalization.py tests/test_text_risk.py -q
 
 ### 手动检查文本
 
-开发时也可以直接调用风险检测：
+开发时也可以直接调用默认归一化器和风险检测：
 
 ```python
-from rapidtts.common.text.normalization import LegacyTextNormalizer
+from rapidtts import TextNormalizerType
+from rapidtts.common.text.normalization import create_text_normalizer
 from rapidtts.common.text.risk import detect_risky_tokens
 
 text = "订单ID是AB20260508，金额是￥99.9。"
-normalized = LegacyTextNormalizer().normalize(text)
+normalizer = create_text_normalizer(TextNormalizerType.WETEXT)
+normalized = normalizer.normalize(text)
 
 for risk in detect_risky_tokens(normalized):
     print(risk.rule, risk.token, risk.reason)

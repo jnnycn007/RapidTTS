@@ -64,6 +64,7 @@ resp.save("outputs/1.wav")
 
 - [MeloTTS](https://github.com/myshell-ai/MeloTTS)
 - [melotts-onnx](https://pypi.org/project/melotts-onnx/)
+- [wetext](https://github.com/pengzhendong/wetext)
 
 ## License
 

@@ -33,6 +33,21 @@ tts = RapidTTS(
 tts = RapidTTS(model=TTSModel.MELO_ONNX, enable_log=False)
 ```
 
+## 文本归一化
+
+Melo ONNX 默认使用 WeText 文本归一化。也可以显式指定归一化器：
+
+```python
+from rapidtts import RapidTTS, TextNormalizerType, TTSModel
+
+tts = RapidTTS(
+    model=TTSModel.MELO_ONNX,
+    text_normalizer_type=TextNormalizerType.WETEXT,
+)
+```
+
+可选值包括 `WETEXT`、`LEGACY` 和 `NONE`。
+
 ## 请求参数
 
 ```python
