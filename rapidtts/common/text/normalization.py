@@ -23,6 +23,22 @@ class LegacyTextNormalizer(TextNormalizer):
     def normalize(self, text: str) -> str:
         import cn2an
 
+        def convert_date(match: re.Match) -> str:
+            year, month, day = match.groups()
+            year_text = "".join(cn2an.an2cn(digit) for digit in year)
+            return f"{year_text}年{cn2an.an2cn(int(month))}月{cn2an.an2cn(int(day))}日"
+
+        text = re.sub(r"(\d{4})-(\d{1,2})-(\d{1,2})", convert_date, text)
+        text = re.sub(
+            r"[￥¥]\s*(\d+(?:\.\d+)?)",
+            lambda match: f"{cn2an.an2cn(match.group(1))}元",
+            text,
+        )
+        text = re.sub(
+            r"(\d+(?:\.\d+)?)\s*[%％]",
+            lambda match: f"百分之{cn2an.an2cn(match.group(1))}",
+            text,
+        )
         numbers = re.findall(r"\d+(?:\.?\d+)?", text)
         for number in numbers:
             text = text.replace(number, cn2an.an2cn(number), 1)
