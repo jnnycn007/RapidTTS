@@ -23,10 +23,20 @@ YEAR_DIGIT_MAP = {
 
 
 def normalize_year_digits(text: str) -> str:
+    def convert_date(match: re.Match) -> str:
+        year, month, day = match.groups()
+        year_text = "".join(YEAR_DIGIT_MAP[digit] for digit in year)
+        return f"{year_text}年{month}月{day}日"
+
     def convert_year(match: re.Match) -> str:
         return "".join(YEAR_DIGIT_MAP[digit] for digit in match.group(1)) + "年"
 
-    return re.sub(r"(?<!\d)(\d{4})年", convert_year, text)
+    text = re.sub(
+        r"(?<!\d)(\d{4})\s*年\s*(\d{1,2})\s*月\s*(\d{1,2})\s*日",
+        convert_date,
+        text,
+    )
+    return re.sub(r"(?<!\d)(\d{4})\s*年", convert_year, text)
 
 
 class TextNormalizer:

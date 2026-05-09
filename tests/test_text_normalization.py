@@ -53,7 +53,9 @@ def test_noop_text_normalizer_returns_input_unchanged():
         ("第2个版本", "第二个版本"),
         ("1个2.5元", "一个二点五元"),
         ("2026年", "二零二六年"),
+        ("2026 年", "二零二六年"),
         ("今天是2026年5月8日", "今天是二零二六年五月八日"),
+        ("今天是2026 年 5 月 8 日", "今天是二零二六年五月八日"),
         ("2026-05-08", "二零二六年五月八日"),
         ("￥13.5", "十三点五元"),
         ("6.3%", "百分之六点三"),
@@ -109,6 +111,7 @@ def test_wetext_normalizer_normalizes_four_digit_year_before_wetext(monkeypatch)
     normalizer = WeTextNormalizer(lang="zh")
 
     assert normalizer.normalize("今天是2026年5月8日") == "今天是二零二六年5月8日"
+    assert normalizer.normalize("今天是2026 年5月8日") == "今天是二零二六年5月8日"
 
 
 def test_wetext_normalizer_reports_missing_optional_dependency(monkeypatch):
