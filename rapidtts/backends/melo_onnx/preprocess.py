@@ -44,13 +44,14 @@ class MeloONNXPreprocessor:
         speaker_id = self.params["data"]["spk2id"][language]
 
         results = []
-        texts = split_sentence(request.text, language=language)
+        normalized_text = self.text_utils.kernel.text_normalize(request.text)
+        texts = split_sentence(normalized_text, language=language)
         for sentence in texts:
             if language in ["EN", "ZH_MIX_EN"]:
                 sentence = re.sub(r"([a-z])([A-Z])", r"\1 \2", sentence)
 
             bert, ja_bert, phones, tones, lang_ids = self._get_text_for_tts_infer(
-                sentence
+                sentence, normalize=False
             )
 
             x_tst = np.expand_dims(phones, axis=0)
@@ -83,8 +84,10 @@ class MeloONNXPreprocessor:
             )
         return results
 
-    def _get_text_for_tts_infer(self, text):
-        norm_text, phone, tone, word2ph = self.text_utils.clean_text(text)
+    def _get_text_for_tts_infer(self, text, normalize: bool = True):
+        norm_text, phone, tone, word2ph = self.text_utils.clean_text(
+            text, normalize=normalize
+        )
         phone, tone, language = self.text_utils.cleaned_text_to_sequence(
             phone, tone, self.language, self.symbol_to_id
         )

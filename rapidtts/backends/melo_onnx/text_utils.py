@@ -29,8 +29,8 @@ class TextUtils:
 
         self.default_symbol_2_ID = {s: i for i, s in enumerate(symbols)}
 
-    def clean_text(self, text):
-        norm_text = self.kernel.text_normalize(text)
+    def clean_text(self, text, normalize: bool = True):
+        norm_text = self.kernel.text_normalize(text) if normalize else text
         phones, tones, word2ph = self.kernel.g2p(norm_text)
         return norm_text, phones, tones, word2ph
 
