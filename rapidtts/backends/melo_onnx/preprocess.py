@@ -21,7 +21,7 @@ class MeloONNXPreprocessor:
     def __init__(
         self,
         model_root_dir: Path,
-        text_normalizer_type: TextNormalizerType = TextNormalizerType.LEGACY,
+        text_normalizer_type: TextNormalizerType = TextNormalizerType.WETEXT,
     ) -> None:
         config_path = model_root_dir / "configuration.json"
         self.params = load_json(config_path)

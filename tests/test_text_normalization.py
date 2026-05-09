@@ -239,6 +239,25 @@ def test_melo_backend_converts_text_normalizer_config_to_enum(monkeypatch, tmp_p
     assert seen["text_normalizer_type"] == TextNormalizerType.WETEXT
 
 
+def test_melo_backend_defaults_to_wetext_normalizer(monkeypatch, tmp_path):
+    seen = {}
+
+    class FakeModel:
+        def __init__(self, config):
+            pass
+
+    class FakePreprocessor:
+        def __init__(self, model_root_dir, text_normalizer_type):
+            seen["text_normalizer_type"] = text_normalizer_type
+
+    monkeypatch.setattr(melo_backend, "MeloONNXModel", FakeModel)
+    monkeypatch.setattr(melo_backend, "MeloONNXPreprocessor", FakePreprocessor)
+
+    melo_backend.MeloONNXBackend(model_root_dir=tmp_path)
+
+    assert seen["text_normalizer_type"] == TextNormalizerType.WETEXT
+
+
 def test_melo_backend_rejects_invalid_text_normalizer_config(monkeypatch, tmp_path):
     class FakeModel:
         def __init__(self, config):

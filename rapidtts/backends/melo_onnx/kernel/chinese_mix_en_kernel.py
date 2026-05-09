@@ -85,7 +85,7 @@ class ChineseMixEnKernel(AbstractKernel):
         model_root_dir: Path,
         onnx_providers: list,
         session_opts=None,
-        text_normalizer_type: TextNormalizerType = TextNormalizerType.LEGACY,
+        text_normalizer_type: TextNormalizerType = TextNormalizerType.WETEXT,
     ):
         tokenizer_path = model_root_dir / "tokenizer.json"
         self.tokenizer = Tokenizer.from_file(str(tokenizer_path))

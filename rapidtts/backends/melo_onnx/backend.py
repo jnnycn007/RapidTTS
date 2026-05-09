@@ -23,7 +23,7 @@ class MeloONNXBackend(BaseTTSBackend):
         model_root_dir: Union[str, Path],
         device: str = "cpu",
         request_defaults: Optional[Dict[str, Any]] = None,
-        text_normalizer_type: str = "legacy",
+        text_normalizer_type: str = "wetext",
     ) -> None:
         self.request_defaults = request_defaults or {}
 

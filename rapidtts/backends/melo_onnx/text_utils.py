@@ -14,7 +14,7 @@ class TextUtils:
         model_root_dir: Path,
         onnx_providers: list,
         session_opts=None,
-        text_normalizer_type: TextNormalizerType = TextNormalizerType.LEGACY,
+        text_normalizer_type: TextNormalizerType = TextNormalizerType.WETEXT,
     ):
         self.language = language
         if self.language == TTSLanguage.ZH_MIX_EN.value:
