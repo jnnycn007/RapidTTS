@@ -52,6 +52,12 @@ resp = tts.synthesize(SynthesisRequest(text="你好，RapidTTS"))
 resp.save("outputs/1.wav")
 ```
 
+## 支持的模型和语言
+
+|模型名称|支持语言|备注|
+|:---:|:---:|:---:|
+|[MeloTTS](https://github.com/myshell-ai/MeloTTS)|ZH_MIX_EN|中英混合|
+
 ## 文档
 
 - [安装说明](docs/installation.md)
