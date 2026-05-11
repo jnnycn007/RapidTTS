@@ -10,7 +10,7 @@
 <a href=""><img alt="Python" src="https://img.shields.io/badge/Python-%3E%3D3.9%2C%3C4-aff.svg?style=flat-square&logo=python&logoColor=white"></a>
 <a href=""><img alt="OS" src="https://img.shields.io/badge/OS-Linux%2C%20Win%2C%20Mac-pink.svg?style=flat-square"></a>
 <a href="https://pypi.org/project/rapidtts/"><img alt="PyPI" src="https://img.shields.io/pypi/v/rapidtts?style=flat-square&logo=pypi&logoColor=white&color=3775A9"></a>
-<a href="https://pepy.tech/project/rapidtts"><img alt="Downloads" src="https://static.pepy.tech/personalized-badge/rapidtts?period=total&units=abbreviation&left_color=555555&right_color=2F80ED&left_text=downloads"></a>
+<a href="https://pepy.tech/project/rapidtts"><img src="https://static.pepy.tech/personalized-badge/rapidtts?style=flat-square&period=total&units=abbreviation&left_color=grey&right_color=blue&left_text=Downloads"></a>
 <a href="https://semver.org/"><img alt="SemVer" src="https://img.shields.io/badge/semver-2.0-3D9970?style=flat-square"></a>
 <a href="https://github.com/psf/black"><img alt="Code style: black" src="https://img.shields.io/badge/code%20style-black-000000?style=flat-square"></a>
 
