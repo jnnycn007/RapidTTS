@@ -72,5 +72,4 @@ resp.save("outputs/1.wav")
 - [wetext](https://github.com/pengzhendong/wetext)
 
 ## License
-
-RapidTTS 使用 Apache-2.0 License。
+Apache-2.0 License。
