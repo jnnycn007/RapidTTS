@@ -64,9 +64,9 @@ rapidtts voices kokoro_onnx
 ## 支持的模型和语言
 
 |模型名称|支持语言|备注|
-|:---:|:---:|:---:|
-|kokoro_onnx|ZH, EN, ZH_MIX_EN|默认后端，支持多音色|
-|melo_onnx|ZH_MIX_EN|可选后端，安装 `rapidtts[melo]`|
+|:---|:---|:---|
+|`kokoro_onnx`|中英混合|默认后端，支持多音色|
+|`melo_onnx`|中英混合|可选后端，安装 `rapidtts[melo]`|
 
 ## 文档
 

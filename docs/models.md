@@ -22,9 +22,9 @@ rapidtts/configs/models.yaml
 ## 支持的模型和语言
 
 |模型名称|支持语言|备注|
-|:---:|:---:|:---:|
-|Kokoro ONNX|ZH, EN, ZH_MIX_EN|默认后端，音色列表从 `voices-v1.1-zh.bin` 动态读取|
-|[MeloTTS](https://github.com/myshell-ai/MeloTTS)|ZH_MIX_EN|中英混合|
+|:---|:---|:---|
+|`kokoro_onnx`|中英混合|默认后端，支持多音色|
+|`melo_onnx`|中英混合|可选后端，安装 `rapidtts[melo]`|
 
 可以通过命令查看权威信息：
 
