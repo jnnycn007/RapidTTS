@@ -154,10 +154,10 @@ def test_kokoro_run_rejects_speed_outside_supported_range():
     preprocessor = KokoroONNXPreprocessor.__new__(KokoroONNXPreprocessor)
 
     with pytest.raises(ValueError, match="Speed must be between 0.5 and 2.0"):
-        preprocessor.run(SynthesisRequest(text="hello", extras={"speed": 0.49}))
+        preprocessor.run(SynthesisRequest(text="hello", speed=0.49))
 
     with pytest.raises(ValueError, match="Speed must be between 0.5 and 2.0"):
-        preprocessor.run(SynthesisRequest(text="hello", extras={"speed": 2.01}))
+        preprocessor.run(SynthesisRequest(text="hello", speed=2.01))
 
 
 def test_kokoro_split_phonemes_prefers_punctuation_boundaries():
@@ -214,7 +214,8 @@ def test_kokoro_backend_normalize_request_applies_defaults_and_extras():
     assert request.speed == 1.0
     assert request.sample_rate == 24000
     assert request.audio_format == "wav"
-    assert request.extras == {"voice": "zf_001", "speed": 1.0}
+    assert request.voice == "zf_001"
+    assert request.speed == 1.0
 
 
 def test_kokoro_backend_normalize_request_allows_request_overrides():
@@ -227,7 +228,7 @@ def test_kokoro_backend_normalize_request_allows_request_overrides():
             speed=1.25,
             sample_rate=16000,
             audio_format="pcm",
-            extras={"voice": "zm_009", "speed": 0.75},
+            voice="zm_009",
         )
     )
 
@@ -235,7 +236,7 @@ def test_kokoro_backend_normalize_request_allows_request_overrides():
     assert request.speed == 1.25
     assert request.sample_rate == 16000
     assert request.audio_format == "pcm"
-    assert request.extras == {"voice": "zm_009", "speed": 0.75}
+    assert request.voice == "zm_009"
 
 
 def test_kokoro_backend_get_voices_returns_sorted_voice_names():

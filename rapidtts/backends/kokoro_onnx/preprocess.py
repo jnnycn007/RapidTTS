@@ -40,11 +40,11 @@ class KokoroONNXPreprocessor:
         self.voices = voices
 
     def run(self, request: SynthesisRequest) -> list[KokoroONNXInput]:
-        speed = request.extras.get("speed", 1.0)
+        speed = request.speed if request.speed is not None else 1.0
         if speed < 0.5 or speed > 2.0:
             raise ValueError(f"Speed must be between 0.5 and 2.0, but got {speed}")
 
-        voice = self.voices[request.extras.get("voice", "zm_009")]
+        voice = self.voices[request.voice or "zf_001"]
 
         phonemes = self.g2p(request.text)
         batched_phoenemes = self.split_phonemes(phonemes)

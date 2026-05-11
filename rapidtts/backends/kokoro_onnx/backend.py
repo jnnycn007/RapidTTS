@@ -86,15 +86,12 @@ class KokoroONNXBackend(BaseTTSBackend):
 
     def normalize_request(self, request: SynthesisRequest) -> SynthesisRequest:
         defaults = self.request_defaults
-        extras = {
-            "voice": defaults["voice"],
-            "speed": request.speed if request.speed is not None else defaults["speed"],
-            **request.extras,
-        }
+        extras = {**request.extras}
 
         return SynthesisRequest(
             text=request.text,
             language=request.language or TTSLanguage(defaults["language"]),
+            voice=request.voice or defaults.get("voice"),
             speed=request.speed if request.speed is not None else defaults["speed"],
             sample_rate=(
                 request.sample_rate

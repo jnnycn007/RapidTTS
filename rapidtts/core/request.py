@@ -11,6 +11,7 @@ from .typings import TTSLanguage
 class SynthesisRequest:
     text: str
     language: Optional[TTSLanguage] = None
+    voice: Optional[str] = None
     speed: Optional[float] = None
     sample_rate: Optional[int] = None
     audio_format: Optional[str] = None
