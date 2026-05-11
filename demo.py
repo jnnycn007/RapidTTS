@@ -1,13 +1,13 @@
 # -*- encoding: utf-8 -*-
 # @Author: SWHL
 # @Contact: liekkaskono@163.com
-from rapidtts import RapidTTS, SynthesisRequest, TTSModel
+from rapidtts import RapidTTS, SynthesisRequest
 
-tts = RapidTTS(model=TTSModel.MELO_ONNX)
+tts = RapidTTS()
 
-text = "2026年5月8日，京A86F29 车主在 302 房间使用手机号 13800138000 输入验证码 123456、支付 110 元，圆周率取值 3.14 并拨打 110 报警电话。"
+text = "今天是2026-05-08，猪肉价格是￥13.5，增长6.3%。车牌号码：京A86F29。"
 result = tts.synthesize(SynthesisRequest(text=text))
 
-save_path = "melo_onnx_result.wav"
+save_path = "rapidtts_result.wav"
 result.save(save_path)
 print(save_path)

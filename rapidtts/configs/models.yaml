@@ -1,3 +1,14 @@
+kokoro_onnx:
+  base_url: https://www.modelscope.cn/models/RapidAI/RapidTTS/resolve/master/models/kokoro/onnx
+  local_dir: models/kokoro_onnx
+  files:
+    - name: kokoro-v1.1-zh.onnx
+      sha256: eefec708cbc7aba8e8129b5c2f7cb92e1fe7d281af1e1dd451592d9ff0714a0d
+    - name: voices-v1.1-zh.bin
+      sha256: 14cb6186c99e4f6016871405f62046c5df863ae27465cbdc4ee08be7dd703acd
+    - name: config.json
+      sha256: bc333efa5ce4ceff433c8c8e5d027a1eca0166001e4e4a62bea2d26ff7a46890
+
 melo_onnx:
   base_url: https://www.modelscope.cn/models/RapidAI/RapidTTS/resolve/master/models/melotts/onnx
   local_dir: models/melotts_zh_mix_en_onnx

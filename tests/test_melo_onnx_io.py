@@ -18,11 +18,13 @@ from rapidtts.backends.melo_onnx.kernel.chinese_mix_en_kernel import ChineseMixE
 from rapidtts.backends.melo_onnx.kernel.english_kernel import EnglishKernel
 from rapidtts.backends.melo_onnx.model import MeloONNXModel
 from rapidtts.backends.melo_onnx.postprocess import MeloONNXPostprocessor
+from rapidtts.backends.melo_onnx.preprocess import MeloONNXPreprocessor
 from rapidtts.backends.melo_onnx.typings import MeloONNXInput
 from rapidtts.common.errors import BackendNotLoadedError
 from rapidtts.core.backend import BaseTTSBackend
 from rapidtts.core.request import SynthesisRequest
 from rapidtts.core.response import SynthesisResponse
+from rapidtts.core.typings import TTSLanguage
 
 
 def make_melo_input(length: int = 4) -> MeloONNXInput:
@@ -61,6 +63,16 @@ def make_melo_onnx_regression_input() -> MeloONNXInput:
 def make_backend_without_init() -> MeloONNXBackend:
     backend = MeloONNXBackend.__new__(MeloONNXBackend)
     backend.language = "ZH_MIX_EN"
+    backend.request_defaults = {
+        "language": "ZH_MIX_EN",
+        "voice": "zf_001",
+        "speed": 1.0,
+        "sample_rate": 44100,
+        "audio_format": "wav",
+        "sdp_ratio": 0.2,
+        "noise_scale": 0.6,
+        "noise_scale_w": 0.8,
+    }
     backend.preprocessor = None
     backend.postprocessor = None
     return backend
@@ -83,6 +95,9 @@ class FakePreprocessor:
     def run(self, request: SynthesisRequest) -> list[MeloONNXInput]:
         self.seen_request = request
         return self.output
+
+    def get_voices(self) -> list[str]:
+        return ["zf_001"]
 
 
 class FakePostprocessor:
@@ -173,6 +188,76 @@ def test_synthesize_passes_request_speed_to_postprocess() -> None:
     assert backend.seen_postprocess_speed == 1.5
     assert response.sample_rate == 24000
     assert response.audio.tolist() == pytest.approx([0.1, 0.2])
+
+
+def test_melo_backend_normalize_request_adds_default_voice() -> None:
+    backend = make_backend_without_init()
+
+    request = backend.normalize_request(SynthesisRequest(text="hello"))
+
+    assert request.language == TTSLanguage.ZH_MIX_EN
+    assert request.speed == 1.0
+    assert request.sample_rate == 44100
+    assert request.audio_format == "wav"
+    assert request.extras == {
+        "voice": "zf_001",
+        "sdp_ratio": 0.2,
+        "noise_scale": 0.6,
+        "noise_scale_w": 0.8,
+    }
+
+
+def test_melo_backend_normalize_request_allows_voice_override() -> None:
+    backend = make_backend_without_init()
+
+    request = backend.normalize_request(
+        SynthesisRequest(text="hello", extras={"voice": "custom_voice"})
+    )
+
+    assert request.extras["voice"] == "custom_voice"
+
+
+def test_melo_preprocessor_exposes_and_resolves_default_voice_alias() -> None:
+    preprocessor = MeloONNXPreprocessor.__new__(MeloONNXPreprocessor)
+    preprocessor.params = {"data": {"spk2id": {"ZH_MIX_EN": 1}}}
+    request = SynthesisRequest(
+        text="hello", language=TTSLanguage.ZH_MIX_EN, extras={"voice": "zf_001"}
+    )
+
+    assert preprocessor.get_voices() == ["zf_001"]
+    assert preprocessor.resolve_speaker_id(request) == 1
+
+
+def test_melo_preprocessor_rejects_unknown_voice() -> None:
+    preprocessor = MeloONNXPreprocessor.__new__(MeloONNXPreprocessor)
+    preprocessor.params = {"data": {"spk2id": {"ZH_MIX_EN": 1}}}
+    request = SynthesisRequest(
+        text="hello", language=TTSLanguage.ZH_MIX_EN, extras={"voice": "bad_voice"}
+    )
+
+    with pytest.raises(ValueError, match="Unsupported Melo voice: bad_voice"):
+        preprocessor.resolve_speaker_id(request)
+
+
+def test_melo_backend_get_voices_delegates_to_preprocessor() -> None:
+    backend = make_backend_without_init()
+    backend.preprocessor = FakePreprocessor()
+
+    assert backend.get_voices() == ["zf_001"]
+
+
+def test_melo_backend_capability_describes_language_and_voices() -> None:
+    backend = make_backend_without_init()
+    backend.preprocessor = FakePreprocessor()
+
+    capability = backend.get_capability()
+
+    assert capability.name == "melo_onnx"
+    assert capability.languages == ["ZH_MIX_EN"]
+    assert capability.default_language == "ZH_MIX_EN"
+    assert capability.voices == ["zf_001"]
+    assert capability.default_voice == "zf_001"
+    assert capability.voice_source == "configuration.json"
 
 
 def test_backend_preprocess_sets_default_language_and_returns_inputs() -> None:

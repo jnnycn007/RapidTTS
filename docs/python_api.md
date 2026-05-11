@@ -3,9 +3,9 @@
 ## 基本用法
 
 ```python
-from rapidtts import RapidTTS, SynthesisRequest, TTSModel
+from rapidtts import RapidTTS, SynthesisRequest
 
-tts = RapidTTS(model=TTSModel.MELO_ONNX)
+tts = RapidTTS()
 
 resp = tts.synthesize(
     SynthesisRequest(
@@ -19,9 +19,11 @@ resp.save("result.wav")
 ## 指定模型目录
 
 ```python
+from rapidtts import RapidTTS, TTSModel
+
 tts = RapidTTS(
-    model=TTSModel.MELO_ONNX,
-    model_root_dir="/path/to/melotts_zh_mix_en_onnx",
+    model=TTSModel.KOKORO_ONNX,
+    model_root_dir="/path/to/kokoro_onnx",
 )
 ```
 
@@ -30,18 +32,36 @@ tts = RapidTTS(
 ## 关闭日志
 
 ```python
-tts = RapidTTS(model=TTSModel.MELO_ONNX, enable_log=False)
+tts = RapidTTS(enable_log=False)
+```
+
+## 查看模型能力
+
+```python
+tts = RapidTTS()
+
+capability = tts.get_capability()
+print(capability.languages)
+print(capability.default_language)
+print(capability.default_voice)
+print(capability.voices)
+```
+
+也可以只查询音色：
+
+```python
+print(tts.get_voices())
 ```
 
 ## 文本归一化
 
-Melo ONNX 默认使用 WeText 文本归一化。也可以显式指定归一化器：
+RapidTTS 默认使用 WeText 文本归一化。也可以显式指定归一化器：
 
 ```python
 from rapidtts import RapidTTS, TextNormalizerType, TTSModel
 
 tts = RapidTTS(
-    model=TTSModel.MELO_ONNX,
+    model=TTSModel.KOKORO_ONNX,
     text_normalizer_type=TextNormalizerType.WETEXT,
 )
 ```

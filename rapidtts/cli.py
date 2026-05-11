@@ -2,12 +2,14 @@
 # @Author: SWHL
 # @Contact: liekkaskono@163.com
 import argparse
+import contextlib
+import io
 import importlib.util
 from pathlib import Path
 from typing import Optional
 
 from .common.logger import logger, set_logger_enabled
-from .core.config import CONFIG_PATH, load_config
+from .core.config import CONFIG_PATH, get_default_backend, load_config
 from .core.model_assets import (
     MODELS_CONFIG_PATH,
     available_model_names,
@@ -16,20 +18,44 @@ from .core.model_assets import (
     load_models_config,
 )
 
-REQUIRED_DEPENDENCIES = [
+COMMON_DEPENDENCIES = [
     "numpy",
     "onnxruntime",
     "omegaconf",
     "soundfile",
-    "librosa",
-    "tokenizers",
     "colorlog",
+    "wetext",
 ]
+
+MODEL_DEPENDENCIES = {
+    "kokoro_onnx": [
+        "misaki",
+        "phonemizer",
+        "espeakng_loader",
+    ],
+    "melo_onnx": [
+        "cn2an",
+        "g2p_en",
+        "jieba",
+        "librosa",
+        "pypinyin",
+        "tokenizers",
+    ],
+}
+
+MODEL_INSTALL_HINTS = {
+    "kokoro_onnx": 'pip install "rapidtts[kokoro]"',
+    "melo_onnx": 'pip install "rapidtts[melo]"',
+}
+
+def get_default_model_name() -> str:
+    return get_default_backend(load_config())
 
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="rapidtts")
     subparsers = parser.add_subparsers(dest="command")
+    default_model = get_default_model_name()
 
     download_parser = subparsers.add_parser(
         "download",
@@ -38,7 +64,7 @@ def build_parser() -> argparse.ArgumentParser:
     download_parser.add_argument(
         "model",
         nargs="?",
-        default="melo_onnx",
+        default=default_model,
         choices=available_model_names(),
         help="Model name to download.",
     )
@@ -65,7 +91,7 @@ def build_parser() -> argparse.ArgumentParser:
     check_parser.add_argument(
         "model",
         nargs="?",
-        default="melo_onnx",
+        default=default_model,
         choices=available_model_names(),
         help="Model name to check.",
     )
@@ -85,6 +111,50 @@ def build_parser() -> argparse.ArgumentParser:
     )
     check_parser.set_defaults(func=check_installation)
 
+    info_parser = subparsers.add_parser(
+        "info",
+        help="Show languages and voices supported by a model.",
+    )
+    info_parser.add_argument(
+        "model",
+        nargs="?",
+        default=default_model,
+        choices=available_model_names(),
+        help="Model name to inspect.",
+    )
+    info_parser.add_argument(
+        "--model-dir",
+        help="Directory containing model assets. Defaults to the RapidTTS package directory.",
+    )
+    info_parser.add_argument(
+        "--quiet",
+        action="store_true",
+        help="Disable RapidTTS logs.",
+    )
+    info_parser.set_defaults(func=show_model_info)
+
+    voices_parser = subparsers.add_parser(
+        "voices",
+        help="List voices supported by a model.",
+    )
+    voices_parser.add_argument(
+        "model",
+        nargs="?",
+        default=default_model,
+        choices=available_model_names(),
+        help="Model name to inspect.",
+    )
+    voices_parser.add_argument(
+        "--model-dir",
+        help="Directory containing model assets. Defaults to the RapidTTS package directory.",
+    )
+    voices_parser.add_argument(
+        "--quiet",
+        action="store_true",
+        help="Disable RapidTTS logs.",
+    )
+    voices_parser.set_defaults(func=show_model_voices)
+
     text_parser = subparsers.add_parser(
         "text",
         help="Synthesize text and save it to an audio file.",
@@ -93,7 +163,7 @@ def build_parser() -> argparse.ArgumentParser:
     text_parser.add_argument("output", help="Output audio file path.")
     text_parser.add_argument(
         "--model",
-        default="melo_onnx",
+        default=default_model,
         choices=available_model_names(),
         help="Model name to use.",
     )
@@ -135,7 +205,7 @@ def check_installation(args: argparse.Namespace) -> int:
 
     ok = True
     ok &= _check_package_import()
-    ok &= _check_dependencies()
+    ok &= _check_dependencies(args.model)
     ok &= _check_configs(args.model)
     ok &= _check_model_files(args.model, args.model_dir)
 
@@ -148,6 +218,28 @@ def check_installation(args: argparse.Namespace) -> int:
 
     print("RapidTTS installation check failed.")
     return 1
+
+
+def show_model_info(args: argparse.Namespace) -> int:
+    set_logger_enabled(not args.quiet)
+    capability = _get_model_capability(
+        model_name=args.model,
+        model_dir=args.model_dir,
+        enable_log=not args.quiet,
+    )
+    print(_format_model_info(capability))
+    return 0
+
+
+def show_model_voices(args: argparse.Namespace) -> int:
+    set_logger_enabled(not args.quiet)
+    capability = _get_model_capability(
+        model_name=args.model,
+        model_dir=args.model_dir,
+        enable_log=not args.quiet,
+    )
+    print(_format_model_voices(capability))
+    return 0
 
 
 def synthesize_text(args: argparse.Namespace) -> int:
@@ -191,6 +283,55 @@ def _run_tts(
     return tts.synthesize(request)
 
 
+def _get_model_capability(
+    model_name: str,
+    model_dir: Optional[str] = None,
+    enable_log: bool = True,
+):
+    from rapidtts import RapidTTS, TTSModel
+
+    model = TTSModel(model_name)
+    kwargs = {"model_root_dir": model_dir} if model_dir else {}
+    if enable_log:
+        return RapidTTS(model=model, enable_log=enable_log, **kwargs).get_capability()
+
+    with contextlib.redirect_stdout(io.StringIO()):
+        tts = RapidTTS(model=model, enable_log=enable_log, **kwargs)
+    return tts.get_capability()
+
+
+def _format_model_info(capability) -> str:
+    voice_count = len(capability.voices)
+    lines = [
+        f"Model: {capability.name}",
+        f"Languages: {', '.join(capability.languages)}",
+        f"Default language: {capability.default_language}",
+        f"Voices: {voice_count} available",
+    ]
+
+    if capability.default_voice:
+        lines.append(f"Default voice: {capability.default_voice}")
+    if capability.voice_source:
+        lines.append(f"Voice source: {capability.voice_source}")
+    if voice_count:
+        lines.extend(
+            [
+                "Run:",
+                f"  rapidtts voices {capability.name}",
+            ]
+        )
+    return "\n".join(lines)
+
+
+def _format_model_voices(capability) -> str:
+    if not capability.voices:
+        return f"No voices are declared for {capability.name}."
+
+    lines = [f"Available voices for {capability.name}:"]
+    lines.extend(f"  {voice}" for voice in capability.voices)
+    return "\n".join(lines)
+
+
 def _save_audio(output_path: str, audio, sample_rate: int) -> Path:
     import soundfile
 
@@ -211,19 +352,24 @@ def _check_package_import() -> bool:
     return True
 
 
-def _check_dependencies() -> bool:
+def _check_dependencies(model_name: str) -> bool:
+    dependencies = COMMON_DEPENDENCIES + MODEL_DEPENDENCIES.get(model_name, [])
     missing = [
         dependency
-        for dependency in REQUIRED_DEPENDENCIES
+        for dependency in dependencies
         if importlib.util.find_spec(dependency) is None
     ]
     if missing:
-        print("[FAIL] required dependencies")
+        print(f"[FAIL] required dependencies for {model_name}")
         for dependency in missing:
             print(f"  - {dependency}")
+        install_hint = MODEL_INSTALL_HINTS.get(model_name)
+        if install_hint:
+            print("Run:")
+            print(f"  {install_hint}")
         return False
 
-    print("[OK] required dependencies")
+    print(f"[OK] required dependencies for {model_name}")
     return True
 
 

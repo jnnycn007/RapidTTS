@@ -3,7 +3,7 @@
 # @Contact: liekkaskono@163.com
 import json
 from pathlib import Path
-from typing import Union
+from typing import List, Union
 
 
 def load_json(file_path: Union[str, Path]) -> dict:
@@ -12,3 +12,9 @@ def load_json(file_path: Union[str, Path]) -> dict:
 
     with open(file_path, "r", encoding="utf-8") as f:
         return json.load(f)
+
+
+def read_txt(txt_path: Union[Path, str]) -> List[str]:
+    with open(txt_path, "r", encoding="utf-8") as f:
+        data = [v.rstrip("\n") for v in f]
+    return data

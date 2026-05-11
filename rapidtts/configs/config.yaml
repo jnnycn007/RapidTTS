@@ -1,5 +1,19 @@
 global:
-  backend: melo_onnx
+  backend: kokoro_onnx
+
+kokoro_onnx:
+  init:
+    model_root_dir: models/kokoro_onnx
+    device: cpu
+    text_normalizer_type: wetext # none, legacy, wetext
+
+  request:
+    language: ZH_MIX_EN
+    voice: zf_001
+    speed: 1.0
+    sample_rate: 24000
+    max_phoneme_length: 510
+    audio_format: wav
 
 melo_onnx:
   init:
@@ -9,6 +23,7 @@ melo_onnx:
 
   request:
     language: ZH_MIX_EN
+    voice: zf_001
     speed: 1.0
     sample_rate: 44100
     audio_format: wav

@@ -1,13 +1,21 @@
+# [common]
+numpy>=1.22.3
+onnxruntime>=1.18.0,<1.21; python_version < "3.10"
+onnxruntime>=1.21.0,<2.0; python_version >= "3.10"
+omegaconf>=2.3.0,<3.0
+colorlog>=6.0,<7.0
+soundfile>=0.12.1,<1.0
+wetext==0.1.2,<2.0
+
+# [kokoro]
+misaki-fork[zh]>=0.9.6,<1.0
+phonemizer-fork>=3.3.2,<4.0
+espeakng-loader>=0.2.4,<1.0
+
+# [melo]
 cn2an>=0.5.22,<1.0
 g2p_en>=2.1.0,<3.0
 jieba>=0.42.1,<1.0
 librosa>=0.11.0,<1.0
-numpy>=1.22.3
-onnxruntime>=1.18.0,<1.21; python_version < "3.10"
-onnxruntime>=1.21.0,<2.0; python_version >= "3.10"
 pypinyin>=0.50.0,<1.0
-soundfile>=0.12.1,<1.0
 tokenizers>=0.13.3,<1.0
-omegaconf>=2.3.0,<3.0
-colorlog>=6.0,<7.0
-wetext==0.1.2,<2.0

@@ -16,6 +16,10 @@ from ...core.typings import TextNormalizerType
 from .text_utils import TextUtils
 from .typings import MeloONNXInput
 
+MELO_VOICE_TO_SPEAKER = {
+    "zf_001": "ZH_MIX_EN",
+}
+
 
 class MeloONNXPreprocessor:
     def __init__(
@@ -41,7 +45,7 @@ class MeloONNXPreprocessor:
         language = request.language.value
         self.language = language
 
-        speaker_id = self.params["data"]["spk2id"][language]
+        speaker_id = self.resolve_speaker_id(request)
 
         results = []
         normalized_text = self.text_utils.kernel.text_normalize(request.text)
@@ -83,6 +87,28 @@ class MeloONNXPreprocessor:
                 )
             )
         return results
+
+    def get_voices(self) -> list[str]:
+        spk2id = self.params["data"]["spk2id"]
+        voice_aliases = [
+            voice
+            for voice, speaker in MELO_VOICE_TO_SPEAKER.items()
+            if speaker in spk2id
+        ]
+        return sorted(voice_aliases or spk2id.keys())
+
+    def resolve_speaker_id(self, request: SynthesisRequest) -> int:
+        spk2id = self.params["data"]["spk2id"]
+        voice = request.extras.get("voice") or request.language.value
+        speaker = MELO_VOICE_TO_SPEAKER.get(voice, voice)
+
+        if speaker not in spk2id:
+            available_voices = ", ".join(self.get_voices())
+            raise ValueError(
+                f"Unsupported Melo voice: {voice}. Available voices: {available_voices}"
+            )
+
+        return spk2id[speaker]
 
     def _get_text_for_tts_infer(self, text, normalize: bool = True):
         norm_text, phone, tone, word2ph = self.text_utils.clean_text(

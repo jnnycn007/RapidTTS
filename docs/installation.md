@@ -1,7 +1,15 @@
 # 安装说明
 
 ```bash
-pip install rapidtts
+pip install "rapidtts[kokoro]"
+```
+
+`pip install rapidtts` 只安装核心依赖。使用具体后端时建议安装对应 extra：
+
+```bash
+pip install "rapidtts[kokoro]"  # 默认 Kokoro ONNX 后端
+pip install "rapidtts[melo]"    # MeloTTS 后端
+pip install "rapidtts[all]"     # 所有后端
 ```
 
 ## 检查安装
@@ -28,5 +36,12 @@ rapidtts check --init-backend
 如果模型文件缺失，先执行：
 
 ```bash
-rapidtts download melo_onnx
+rapidtts download kokoro_onnx
+```
+
+如果需要使用 MeloTTS 后端，额外安装：
+
+```bash
+pip install "rapidtts[melo]"
+rapidtts check melo_onnx
 ```

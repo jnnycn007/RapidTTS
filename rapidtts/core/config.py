@@ -15,6 +15,10 @@ def load_config(config_path: Union[str, Path, None] = None):
     return OmegaConf.load(path)
 
 
+def get_default_backend(cfg) -> str:
+    return OmegaConf.to_container(cfg["global"], resolve=True)["backend"]
+
+
 def get_backend_init_defaults(cfg, backend_name: str) -> dict:
     return OmegaConf.to_container(
         cfg[backend_name].init, resolve=True, throw_on_missing=True

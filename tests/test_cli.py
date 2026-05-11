@@ -15,6 +15,7 @@ sys.path.append(str(cur_dir.parent))
 
 from rapidtts import cli
 from rapidtts.core import model_assets
+from rapidtts.core.typings import ModelCapability
 
 
 @dataclass
@@ -53,11 +54,39 @@ def test_download_cli_passes_model_dir_and_progress_options(monkeypatch, tmp_pat
     }
 
 
+def test_cli_uses_configured_default_model(monkeypatch):
+    parser = cli.build_parser()
+
+    download_args = parser.parse_args(["download"])
+    check_args = parser.parse_args(["check"])
+    info_args = parser.parse_args(["info"])
+    voices_args = parser.parse_args(["voices"])
+    text_args = parser.parse_args(["text", "hello", "out.wav"])
+
+    assert download_args.model == "kokoro_onnx"
+    assert check_args.model == "kokoro_onnx"
+    assert info_args.model == "kokoro_onnx"
+    assert voices_args.model == "kokoro_onnx"
+    assert text_args.model == "kokoro_onnx"
+
+
+def test_cli_parser_default_model_is_config_driven(monkeypatch):
+    monkeypatch.setattr(cli, "get_default_model_name", lambda: "melo_onnx")
+
+    parser = cli.build_parser()
+
+    assert parser.parse_args(["download"]).model == "melo_onnx"
+    assert parser.parse_args(["check"]).model == "melo_onnx"
+    assert parser.parse_args(["info"]).model == "melo_onnx"
+    assert parser.parse_args(["voices"]).model == "melo_onnx"
+    assert parser.parse_args(["text", "hello", "out.wav"]).model == "melo_onnx"
+
+
 def test_check_cli_success_without_backend_init(monkeypatch, capsys):
     backend_called = False
 
     monkeypatch.setattr(cli, "_check_package_import", lambda: True)
-    monkeypatch.setattr(cli, "_check_dependencies", lambda: True)
+    monkeypatch.setattr(cli, "_check_dependencies", lambda model_name: True)
     monkeypatch.setattr(cli, "_check_configs", lambda model_name: True)
     monkeypatch.setattr(cli, "_check_model_files", lambda model_name, model_dir: True)
 
@@ -80,7 +109,7 @@ def test_check_cli_runs_backend_init_when_requested(monkeypatch):
     seen = {}
 
     monkeypatch.setattr(cli, "_check_package_import", lambda: True)
-    monkeypatch.setattr(cli, "_check_dependencies", lambda: True)
+    monkeypatch.setattr(cli, "_check_dependencies", lambda model_name: True)
     monkeypatch.setattr(cli, "_check_configs", lambda model_name: True)
     monkeypatch.setattr(cli, "_check_model_files", lambda model_name, model_dir: True)
 
@@ -108,7 +137,7 @@ def test_check_cli_runs_backend_init_when_requested(monkeypatch):
 
 def test_check_cli_returns_failure_when_model_assets_fail(monkeypatch, capsys):
     monkeypatch.setattr(cli, "_check_package_import", lambda: True)
-    monkeypatch.setattr(cli, "_check_dependencies", lambda: True)
+    monkeypatch.setattr(cli, "_check_dependencies", lambda model_name: True)
     monkeypatch.setattr(cli, "_check_configs", lambda model_name: True)
     monkeypatch.setattr(cli, "_check_model_files", lambda model_name, model_dir: False)
 
@@ -117,6 +146,58 @@ def test_check_cli_returns_failure_when_model_assets_fail(monkeypatch, capsys):
     captured = capsys.readouterr()
     assert exit_code == 1
     assert "RapidTTS installation check failed." in captured.out
+
+
+def test_check_dependencies_uses_kokoro_dependency_set(monkeypatch, capsys):
+    seen = []
+
+    def fake_find_spec(name):
+        seen.append(name)
+        return object()
+
+    monkeypatch.setattr(cli.importlib.util, "find_spec", fake_find_spec)
+
+    assert cli._check_dependencies("kokoro_onnx") is True
+
+    captured = capsys.readouterr()
+    assert "[OK] required dependencies for kokoro_onnx" in captured.out
+    assert "misaki" in seen
+    assert "phonemizer" in seen
+    assert "espeakng_loader" in seen
+    assert "librosa" not in seen
+    assert "tokenizers" not in seen
+
+
+def test_check_dependencies_reports_kokoro_extra_install_hint(monkeypatch, capsys):
+    def fake_find_spec(name):
+        if name == "phonemizer":
+            return None
+        return object()
+
+    monkeypatch.setattr(cli.importlib.util, "find_spec", fake_find_spec)
+
+    assert cli._check_dependencies("kokoro_onnx") is False
+
+    captured = capsys.readouterr()
+    assert "[FAIL] required dependencies for kokoro_onnx" in captured.out
+    assert "  - phonemizer" in captured.out
+    assert 'pip install "rapidtts[kokoro]"' in captured.out
+
+
+def test_check_dependencies_reports_melo_extra_install_hint(monkeypatch, capsys):
+    def fake_find_spec(name):
+        if name == "g2p_en":
+            return None
+        return object()
+
+    monkeypatch.setattr(cli.importlib.util, "find_spec", fake_find_spec)
+
+    assert cli._check_dependencies("melo_onnx") is False
+
+    captured = capsys.readouterr()
+    assert "[FAIL] required dependencies for melo_onnx" in captured.out
+    assert "  - g2p_en" in captured.out
+    assert 'pip install "rapidtts[melo]"' in captured.out
 
 
 def test_text_cli_synthesizes_and_saves_audio(monkeypatch, tmp_path):
@@ -190,6 +271,56 @@ def test_text_cli_synthesizes_and_saves_audio(monkeypatch, tmp_path):
     assert seen["save_audio"]["output_path"] == str(output_path)
     assert seen["save_audio"]["audio"] is response.audio
     assert seen["save_audio"]["sample_rate"] == 16000
+
+
+def test_info_cli_prints_model_capability(monkeypatch, capsys):
+    capability = ModelCapability(
+        name="kokoro_onnx",
+        languages=["ZH", "EN", "ZH_MIX_EN"],
+        default_language="ZH_MIX_EN",
+        voices=["zf_001", "zm_009"],
+        default_voice="zf_001",
+        voice_source="voices-v1.1-zh.bin",
+    )
+
+    monkeypatch.setattr(
+        cli,
+        "_get_model_capability",
+        lambda model_name, model_dir=None, enable_log=True: capability,
+    )
+
+    exit_code = cli.main(["info", "kokoro_onnx", "--quiet"])
+
+    captured = capsys.readouterr()
+    assert exit_code == 0
+    assert "Model: kokoro_onnx" in captured.out
+    assert "Languages: ZH, EN, ZH_MIX_EN" in captured.out
+    assert "Voices: 2 available" in captured.out
+    assert "Default voice: zf_001" in captured.out
+    assert "rapidtts voices kokoro_onnx" in captured.out
+
+
+def test_voices_cli_prints_voice_list(monkeypatch, capsys):
+    capability = ModelCapability(
+        name="melo_onnx",
+        languages=["ZH_MIX_EN"],
+        default_language="ZH_MIX_EN",
+        voices=["zf_001"],
+        default_voice="zf_001",
+        voice_source="configuration.json",
+    )
+
+    monkeypatch.setattr(
+        cli,
+        "_get_model_capability",
+        lambda model_name, model_dir=None, enable_log=True: capability,
+    )
+
+    exit_code = cli.main(["voices", "melo_onnx", "--quiet"])
+
+    captured = capsys.readouterr()
+    assert exit_code == 0
+    assert captured.out == "Available voices for melo_onnx:\n  zf_001\n"
 
 
 def test_check_model_assets_reports_missing_and_hash_mismatch(monkeypatch, tmp_path):

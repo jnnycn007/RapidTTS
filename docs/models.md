@@ -1,9 +1,9 @@
 # 模型文件
 
-默认模型文件托管在 ModelScope：
+模型文件托管在 ModelScope：
 
 ```text
-https://www.modelscope.cn/models/RapidAI/RapidTTS/tree/master/models/melotts/onnx
+https://www.modelscope.cn/models/RapidAI/RapidTTS/tree/master/models
 ```
 
 模型元数据声明在：
@@ -23,14 +23,36 @@ rapidtts/configs/models.yaml
 
 |模型名称|支持语言|备注|
 |:---:|:---:|:---:|
+|Kokoro ONNX|ZH, EN, ZH_MIX_EN|默认后端，音色列表从 `voices-v1.1-zh.bin` 动态读取|
 |[MeloTTS](https://github.com/myshell-ai/MeloTTS)|ZH_MIX_EN|中英混合|
+
+可以通过命令查看权威信息：
+
+```bash
+rapidtts info kokoro_onnx
+rapidtts voices kokoro_onnx
+```
+
+Kokoro ONNX 是默认后端，建议安装：
+
+```bash
+pip install "rapidtts[kokoro]"
+```
+
+MeloTTS 后端需要额外安装依赖：
+
+```bash
+pip install "rapidtts[melo]"
+rapidtts info melo_onnx
+rapidtts voices melo_onnx
+```
 
 ## 默认下载目录
 
 如果用户没有指定模型目录，RapidTTS 会把默认模型下载到库安装目录下：
 
 ```text
-<rapidtts package root>/models/melotts_zh_mix_en_onnx
+<rapidtts package root>/models/kokoro_onnx
 ```
 
 `models.yaml` 中的相对路径会以 `rapidtts` 包目录作为基准，而不是当前工作目录。
@@ -48,17 +70,17 @@ rapidtts/configs/models.yaml
 ## 手动下载
 
 ```bash
-rapidtts download melo_onnx
+rapidtts download kokoro_onnx
 ```
 
 下载到自定义目录：
 
 ```bash
-rapidtts download melo_onnx --save-dir /path/to/melotts_zh_mix_en_onnx
+rapidtts download kokoro_onnx --save-dir /path/to/kokoro_onnx
 ```
 
 检查模型文件：
 
 ```bash
-rapidtts check melo_onnx
+rapidtts check kokoro_onnx
 ```
