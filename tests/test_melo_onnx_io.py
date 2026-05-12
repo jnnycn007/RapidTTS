@@ -211,20 +211,31 @@ def test_melo_backend_normalize_request_allows_voice_override() -> None:
     backend = make_backend_without_init()
 
     request = backend.normalize_request(
-        SynthesisRequest(text="hello", extras={"voice": "custom_voice"})
+        SynthesisRequest(text="hello", voice="custom_voice")
     )
 
-    assert request.extras["voice"] == "custom_voice"
+    assert request.voice == "custom_voice"
+    assert "voice" not in request.extras
 
 
 def test_melo_preprocessor_exposes_and_resolves_default_voice_alias() -> None:
     preprocessor = MeloONNXPreprocessor.__new__(MeloONNXPreprocessor)
     preprocessor.params = {"data": {"spk2id": {"ZH_MIX_EN": 1}}}
     request = SynthesisRequest(
-        text="hello", language=TTSLanguage.ZH_MIX_EN, extras={"voice": "zf_001"}
+        text="hello", language=TTSLanguage.ZH_MIX_EN, voice="zf_001"
     )
 
     assert preprocessor.get_voices() == ["zf_001"]
+    assert preprocessor.resolve_speaker_id(request) == 1
+
+
+def test_melo_preprocessor_resolves_request_voice_alias() -> None:
+    preprocessor = MeloONNXPreprocessor.__new__(MeloONNXPreprocessor)
+    preprocessor.params = {"data": {"spk2id": {"ZH_MIX_EN": 1}}}
+    request = SynthesisRequest(
+        text="hello", language=TTSLanguage.ZH_MIX_EN, voice="zf_001"
+    )
+
     assert preprocessor.resolve_speaker_id(request) == 1
 
 
@@ -232,7 +243,7 @@ def test_melo_preprocessor_rejects_unknown_voice() -> None:
     preprocessor = MeloONNXPreprocessor.__new__(MeloONNXPreprocessor)
     preprocessor.params = {"data": {"spk2id": {"ZH_MIX_EN": 1}}}
     request = SynthesisRequest(
-        text="hello", language=TTSLanguage.ZH_MIX_EN, extras={"voice": "bad_voice"}
+        text="hello", language=TTSLanguage.ZH_MIX_EN, voice="bad_voice"
     )
 
     with pytest.raises(ValueError, match="Unsupported Melo voice: bad_voice"):

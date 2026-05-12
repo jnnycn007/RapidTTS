@@ -1,33 +1,70 @@
 # 命令行用法
 
-RapidTTS 安装后会提供 `rapidtts` 命令。
+RapidTTS 安装后会提供 `rapidtts` 命令。CLI 适合下载模型、检查环境、查看模型能力，以及从文本生成音频文件。
 
 ## 命令速查
 
 ```bash
-rapidtts download [kokoro_onnx] [--save-dir DIR] [--no-progress] [--quiet]
-rapidtts check [kokoro_onnx] [--model-dir DIR] [--init-backend] [--quiet]
-rapidtts info [kokoro_onnx] [--model-dir DIR] [--quiet]
-rapidtts voices [kokoro_onnx] [--model-dir DIR] [--quiet]
-rapidtts text TEXT OUTPUT [--model kokoro_onnx] [--model-dir DIR] [--language ZH|EN|ZH_MIX_EN] [--speed SPEED] [--sample-rate SAMPLE_RATE] [--quiet]
+rapidtts download [MODEL] [--save-dir DIR] [--no-progress] [--quiet]
+rapidtts check [MODEL] [--model-dir DIR] [--init-backend] [--quiet]
+rapidtts info [MODEL] [--model-dir DIR] [--quiet]
+rapidtts voices [MODEL] [--model-dir DIR] [--quiet]
+rapidtts text TEXT OUTPUT [--model MODEL] [--model-dir DIR] [--language ZH|EN|ZH_MIX_EN] [--voice VOICE] [--speed SPEED] [--sample-rate SAMPLE_RATE] [--quiet]
 ```
 
-## 检查安装
+`MODEL` 可选：
+
+- `kokoro_onnx`：默认后端
+- `melo_onnx`：MeloTTS ONNX 后端
+
+## 生成音频
+
+最小示例：
 
 ```bash
-rapidtts check
+rapidtts text "你好，RapidTTS" outputs/1.wav
 ```
 
-检查自定义模型目录：
+指定模型：
 
 ```bash
-rapidtts check kokoro_onnx --model-dir /path/to/kokoro_onnx
+rapidtts text "你好，RapidTTS" outputs/kokoro.wav --model kokoro_onnx
+rapidtts text "你好，RapidTTS" outputs/melo.wav --model melo_onnx
 ```
 
-同时初始化后端：
+指定语言：
 
 ```bash
-rapidtts check --init-backend
+rapidtts text "hello world" outputs/en.wav --language EN
+rapidtts text "你好，RapidTTS" outputs/zh.wav --language ZH
+rapidtts text "我在学习machine learning" outputs/mix.wav --language ZH_MIX_EN
+```
+
+指定音色：
+
+```bash
+rapidtts voices kokoro_onnx
+rapidtts text "你好，RapidTTS" outputs/zm_009.wav --model kokoro_onnx --voice zm_009
+```
+
+`--voice` 对应 Python API 中的 `SynthesisRequest.voice`。
+
+MeloTTS ONNX 当前只暴露 `zf_001`：
+
+```bash
+rapidtts text "你好，RapidTTS" outputs/melo_zf_001.wav --model melo_onnx --voice zf_001
+```
+
+指定语速和采样率：
+
+```bash
+rapidtts text "你好，RapidTTS" outputs/fast.wav --speed 1.2 --sample-rate 16000
+```
+
+使用自定义模型目录：
+
+```bash
+rapidtts text "你好，RapidTTS" outputs/1.wav --model kokoro_onnx --model-dir /path/to/kokoro_onnx
 ```
 
 ## 查看模型能力
@@ -44,16 +81,9 @@ rapidtts info kokoro_onnx
 rapidtts voices kokoro_onnx
 ```
 
-Kokoro ONNX 是默认后端，建议安装：
+查看 MeloTTS ONNX：
 
 ```bash
-pip install "rapidtts[kokoro]"
-```
-
-MeloTTS 后端需要额外依赖：
-
-```bash
-pip install "rapidtts[melo]"
 rapidtts info melo_onnx
 rapidtts voices melo_onnx
 ```
@@ -78,37 +108,35 @@ rapidtts download kokoro_onnx --save-dir /path/to/kokoro_onnx
 rapidtts download kokoro_onnx --no-progress
 ```
 
-关闭日志：
+## 检查安装
+
+检查默认模型和依赖：
 
 ```bash
-rapidtts download kokoro_onnx --quiet
+rapidtts check
 ```
 
-## 文本合成
+检查指定模型：
 
 ```bash
-rapidtts text "你好，RapidTTS" outputs/1.wav
+rapidtts check melo_onnx
 ```
 
-指定语言：
+检查自定义模型目录：
 
 ```bash
-rapidtts text "hello world" outputs/en.wav --language EN
+rapidtts check kokoro_onnx --model-dir /path/to/kokoro_onnx
 ```
 
-指定语速和采样率：
+同时初始化后端：
 
 ```bash
-rapidtts text "你好，RapidTTS" outputs/1.wav --speed 1.2 --sample-rate 16000
+rapidtts check kokoro_onnx --init-backend
 ```
 
-使用自定义模型目录：
+## 关闭日志
 
-```bash
-rapidtts text "你好，RapidTTS" outputs/1.wav --model-dir /path/to/melotts_zh_mix_en_onnx
-```
-
-关闭 RapidTTS 日志：
+所有子命令都支持 `--quiet`：
 
 ```bash
 rapidtts text "你好，RapidTTS" outputs/1.wav --quiet

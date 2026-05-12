@@ -62,12 +62,15 @@ def test_cli_uses_configured_default_model(monkeypatch):
     info_args = parser.parse_args(["info"])
     voices_args = parser.parse_args(["voices"])
     text_args = parser.parse_args(["text", "hello", "out.wav"])
+    voice_args = parser.parse_args(["text", "hello", "out.wav", "--voice", "zm_009"])
 
     assert download_args.model == "kokoro_onnx"
     assert check_args.model == "kokoro_onnx"
     assert info_args.model == "kokoro_onnx"
     assert voices_args.model == "kokoro_onnx"
     assert text_args.model == "kokoro_onnx"
+    assert text_args.voice is None
+    assert voice_args.voice == "zm_009"
 
 
 def test_cli_parser_default_model_is_config_driven(monkeypatch):
@@ -212,6 +215,7 @@ def test_text_cli_synthesizes_and_saves_audio(monkeypatch, tmp_path):
         model_name,
         model_dir=None,
         language=None,
+        voice=None,
         speed=None,
         sample_rate=None,
         enable_log=True,
@@ -221,6 +225,7 @@ def test_text_cli_synthesizes_and_saves_audio(monkeypatch, tmp_path):
             "model_name": model_name,
             "model_dir": model_dir,
             "language": language,
+            "voice": voice,
             "speed": speed,
             "sample_rate": sample_rate,
             "enable_log": enable_log,
@@ -250,6 +255,8 @@ def test_text_cli_synthesizes_and_saves_audio(monkeypatch, tmp_path):
             "custom_model_dir",
             "--language",
             "EN",
+            "--voice",
+            "zf_001",
             "--speed",
             "1.2",
             "--sample-rate",
@@ -264,6 +271,7 @@ def test_text_cli_synthesizes_and_saves_audio(monkeypatch, tmp_path):
         "model_name": "melo_onnx",
         "model_dir": "custom_model_dir",
         "language": "EN",
+        "voice": "zf_001",
         "speed": 1.2,
         "sample_rate": 16000,
         "enable_log": False,
@@ -271,6 +279,49 @@ def test_text_cli_synthesizes_and_saves_audio(monkeypatch, tmp_path):
     assert seen["save_audio"]["output_path"] == str(output_path)
     assert seen["save_audio"]["audio"] is response.audio
     assert seen["save_audio"]["sample_rate"] == 16000
+
+
+def test_run_tts_passes_voice_to_synthesis_request(monkeypatch):
+    import rapidtts
+
+    seen = {}
+    response = FakeSynthesisResponse(
+        audio=np.array([0.1, 0.2], dtype=np.float32),
+        sample_rate=24000,
+    )
+
+    class FakeRapidTTS:
+        def __init__(self, model, enable_log=True, **kwargs):
+            seen["model"] = model.value
+            seen["enable_log"] = enable_log
+            seen["kwargs"] = kwargs
+
+        def synthesize(self, request):
+            seen["request"] = request
+            return response
+
+    monkeypatch.setattr(rapidtts, "RapidTTS", FakeRapidTTS)
+
+    result = cli._run_tts(
+        text="hello",
+        model_name="kokoro_onnx",
+        model_dir="custom_model_dir",
+        language="EN",
+        voice="zm_009",
+        speed=1.2,
+        sample_rate=16000,
+        enable_log=False,
+    )
+
+    assert result is response
+    assert seen["model"] == "kokoro_onnx"
+    assert seen["enable_log"] is False
+    assert seen["kwargs"] == {"model_root_dir": "custom_model_dir"}
+    assert seen["request"].text == "hello"
+    assert seen["request"].language.value == "EN"
+    assert seen["request"].voice == "zm_009"
+    assert seen["request"].speed == 1.2
+    assert seen["request"].sample_rate == 16000
 
 
 def test_info_cli_prints_model_capability(monkeypatch, capsys):

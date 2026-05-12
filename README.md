@@ -12,39 +12,33 @@
 <a href="https://pepy.tech/project/rapidtts"><img src="https://static.pepy.tech/personalized-badge/rapidtts?style=flat-square&period=total&units=abbreviation&left_color=grey&right_color=blue&left_text=Downloads"></a>
 <a href="https://semver.org/"><img alt="SemVer" src="https://img.shields.io/badge/semver-2.0-3D9970?style=flat-square"></a>
 <a href="https://github.com/psf/black"><img alt="Code style: black" src="https://img.shields.io/badge/code%20style-black-000000?style=flat-square"></a>
-
 </div>
 
 ## 简介
 
-RapidTTS 是一个轻量级文本转语音工具，面向本地快速推理。当前默认后端是 Kokoro ONNX。
+RapidTTS 是一个轻量级文本转语音工具，面向本地快速推理。当前默认后端是 `kokoro_onnx`，同时支持 `melo_onnx`。
 
 ## 特性
 
 - 支持 Kokoro ONNX 和 MeloTTS ONNX 推理
 - 支持中文、英文和中英混合文本
-- 支持查询每个模型的语言和音色能力
-- 默认模型自动下载，并使用 SHA256 校验
-- 提供命令行工具：下载模型、检查安装、文本合成
-- 提供 Python API，便于集成到应用中
+- 支持查询模型语言、默认参数和音色能力
+- 模型文件可自动下载，并使用 SHA256 校验
+- 同时提供 Python API 和命令行工具
 
 ## 安装
+
+默认推荐安装 Kokoro ONNX 后端：
 
 ```bash
 pip install "rapidtts[kokoro]"
 ```
 
-如果只安装核心包，可以使用 `pip install rapidtts`；运行具体后端前需要安装对应 extra。
+其他安装方式见 [安装说明](docs/installation.md)。
 
 ## 快速使用
 
-命令行合成：
-
-```bash
-rapidtts text "你好，RapidTTS" outputs/1.wav
-```
-
-Python 调用：
+### Python API
 
 ```python
 from rapidtts import RapidTTS, SynthesisRequest
@@ -54,27 +48,50 @@ resp = tts.synthesize(SynthesisRequest(text="你好，RapidTTS"))
 resp.save("outputs/1.wav")
 ```
 
-查看模型支持的语言和音色：
+指定模型和音色：
 
-```bash
-rapidtts info kokoro_onnx
-rapidtts voices kokoro_onnx
+```python
+from rapidtts import RapidTTS, SynthesisRequest, TTSModel
+
+tts = RapidTTS(model=TTSModel.KOKORO_ONNX)
+resp = tts.synthesize(
+    SynthesisRequest(
+        text="你好，RapidTTS",
+        voice="zm_009",
+    )
+)
+resp.save("outputs/zm_009.wav")
 ```
 
-## 支持的模型和语言
+更多示例见 [Python API](docs/python_api.md)。
 
-|模型名称|支持语言|备注|
-|:---|:---|:---|
-|`kokoro_onnx`|中英混合|默认后端，支持多音色|
-|`melo_onnx`|中英混合|可选后端，安装 `rapidtts[melo]`|
+### 命令行
+
+```bash
+rapidtts text "你好，RapidTTS" outputs/1.wav
+```
+
+指定模型：
+
+```bash
+rapidtts text "你好，RapidTTS" outputs/kokoro.wav --model kokoro_onnx
+```
+
+指定模型和音色：
+
+```bash
+rapidtts text "你好，RapidTTS" outputs/zm_009.wav --model kokoro_onnx --voice zm_009
+```
+
+更多命令见 [命令行用法](docs/cli.md)。
 
 ## 文档
 
-- [安装说明](docs/installation.md)
-- [命令行用法](docs/cli.md)
-- [Python API](docs/python_api.md)
-- [模型文件](docs/models.md)
-- [开发说明](docs/development.md)
+- [安装说明](docs/installation.md)：安装 extra、检查依赖和模型文件
+- [Python API](docs/python_api.md)：在代码中指定模型、音色、语言、语速和模型目录
+- [命令行用法](docs/cli.md)：下载模型、检查安装、查询能力、合成音频
+- [模型信息](docs/models.md)：支持的模型、语言、音色规则和模型文件
+- [开发说明](docs/development.md)：测试、文本归一化和项目结构
 
 ## 致谢
 

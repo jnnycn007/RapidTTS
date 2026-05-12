@@ -99,7 +99,7 @@ class MeloONNXPreprocessor:
 
     def resolve_speaker_id(self, request: SynthesisRequest) -> int:
         spk2id = self.params["data"]["spk2id"]
-        voice = request.extras.get("voice") or request.language.value
+        voice = request.voice or request.language.value
         speaker = MELO_VOICE_TO_SPEAKER.get(voice, voice)
 
         if speaker not in spk2id:

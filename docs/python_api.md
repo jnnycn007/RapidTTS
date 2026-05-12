@@ -1,6 +1,8 @@
 # Python API
 
-## 基本用法
+Python API 适合在应用中集成 RapidTTS。核心流程是创建 `RapidTTS`，构造 `SynthesisRequest`，再保存 `SynthesisResponse`。
+
+## 最小示例
 
 ```python
 from rapidtts import RapidTTS, SynthesisRequest
@@ -8,13 +10,106 @@ from rapidtts import RapidTTS, SynthesisRequest
 tts = RapidTTS()
 
 resp = tts.synthesize(
-    SynthesisRequest(
-        text="我最近在学习machine learning，希望能够在未来的artificial intelligence领域有所建树。"
-    )
+    SynthesisRequest(text="我最近在学习machine learning，希望能够在未来的artificial intelligence领域有所建树。")
 )
 
 resp.save("result.wav")
 ```
+
+未指定模型时，RapidTTS 使用配置中的默认后端，目前是 `kokoro_onnx`。
+
+## 指定模型
+
+```python
+from rapidtts import RapidTTS, SynthesisRequest, TTSModel
+
+tts = RapidTTS(model=TTSModel.KOKORO_ONNX)
+resp = tts.synthesize(SynthesisRequest(text="你好，RapidTTS"))
+resp.save("kokoro.wav")
+```
+
+使用 MeloTTS ONNX：
+
+```python
+from rapidtts import RapidTTS, SynthesisRequest, TTSModel
+
+tts = RapidTTS(model=TTSModel.MELO_ONNX)
+resp = tts.synthesize(SynthesisRequest(text="你好，RapidTTS"))
+resp.save("melo.wav")
+```
+
+可选模型：
+
+- `TTSModel.KOKORO_ONNX`：默认后端，支持多音色
+- `TTSModel.MELO_ONNX`：可选后端，当前只暴露 `zf_001` 音色
+
+## 指定音色
+
+音色统一通过 `SynthesisRequest.voice` 指定，不放在 `extras` 中。
+
+Kokoro ONNX 支持多音色：
+
+```python
+from rapidtts import RapidTTS, SynthesisRequest, TTSModel
+
+tts = RapidTTS(model=TTSModel.KOKORO_ONNX)
+
+resp = tts.synthesize(
+    SynthesisRequest(
+        text="你好，RapidTTS",
+        voice="zm_009",
+    )
+)
+resp.save("kokoro_zm_009.wav")
+```
+
+查询当前模型可用音色：
+
+```python
+from rapidtts import RapidTTS, TTSModel
+
+tts = RapidTTS(model=TTSModel.KOKORO_ONNX)
+print(tts.get_voices())
+```
+
+MeloTTS ONNX 当前只暴露 `zf_001`：
+
+```python
+from rapidtts import RapidTTS, SynthesisRequest, TTSModel
+
+tts = RapidTTS(model=TTSModel.MELO_ONNX)
+resp = tts.synthesize(
+    SynthesisRequest(
+        text="你好，RapidTTS",
+        voice="zf_001",
+    )
+)
+resp.save("melo_zf_001.wav")
+```
+
+## 指定语言、语速和采样率
+
+```python
+from rapidtts import RapidTTS, SynthesisRequest, TTSLanguage
+
+tts = RapidTTS()
+
+resp = tts.synthesize(
+    SynthesisRequest(
+        text="hello world",
+        language=TTSLanguage.EN,
+        speed=1.1,
+        sample_rate=16000,
+    )
+)
+resp.save("en.wav")
+```
+
+常用语言：
+
+- `TTSLanguage.ZH`：中文
+- `TTSLanguage.EN`：英文
+- `TTSLanguage.ZH_MIX_EN`：中英混合
 
 ## 指定模型目录
 
@@ -29,29 +124,22 @@ tts = RapidTTS(
 
 如果不指定 `model_root_dir`，RapidTTS 会使用默认模型目录，并在模型缺失时自动下载。
 
-## 关闭日志
-
-```python
-tts = RapidTTS(enable_log=False)
-```
-
 ## 查看模型能力
 
 ```python
-tts = RapidTTS()
+from rapidtts import RapidTTS, TTSModel
+
+tts = RapidTTS(model=TTSModel.KOKORO_ONNX)
 
 capability = tts.get_capability()
+print(capability.name)
 print(capability.languages)
 print(capability.default_language)
 print(capability.default_voice)
 print(capability.voices)
 ```
 
-也可以只查询音色：
-
-```python
-print(tts.get_voices())
-```
+`get_capability()` 返回 `ModelCapability`，包含模型名称、支持语言、默认语言、音色列表、默认音色和音色来源。
 
 ## 文本归一化
 
@@ -66,26 +154,22 @@ tts = RapidTTS(
 )
 ```
 
-可选值包括 `WETEXT`、`LEGACY` 和 `NONE`。
+可选值：
 
-## 请求参数
+- `TextNormalizerType.WETEXT`
+- `TextNormalizerType.LEGACY`
+- `TextNormalizerType.NONE`
 
-```python
-from rapidtts import SynthesisRequest, TTSLanguage
+## 请求字段
 
-request = SynthesisRequest(
-    text="hello world",
-    language=TTSLanguage.EN,
-    speed=1.1,
-    sample_rate=16000,
-)
-```
+`SynthesisRequest` 常用字段如下：
 
-常用字段：
-
-- `text`：待合成文本
-- `language`：语言，可选 `ZH`、`EN`、`ZH_MIX_EN`
-- `speed`：语速
-- `sample_rate`：输出采样率
-- `audio_format`：音频格式
-- `extras`：后端扩展参数
+|字段|说明|
+|:---|:---|
+|`text`|待合成文本|
+|`language`|语言，可选 `ZH`、`EN`、`ZH_MIX_EN`|
+|`voice`|音色名称，例如 `zf_001`、`zm_009`|
+|`speed`|语速，默认 `1.0`|
+|`sample_rate`|输出采样率|
+|`audio_format`|音频格式，默认 `wav`|
+|`extras`|后端扩展参数，不用于传递 `voice`|

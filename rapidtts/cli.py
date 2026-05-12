@@ -176,6 +176,7 @@ def build_parser() -> argparse.ArgumentParser:
         choices=["ZH", "EN", "ZH_MIX_EN"],
         help="Text language.",
     )
+    text_parser.add_argument("--voice", help="Voice name.")
     text_parser.add_argument("--speed", type=float, help="Speech speed.")
     text_parser.add_argument("--sample-rate", type=int, help="Output sample rate.")
     text_parser.add_argument(
@@ -250,6 +251,7 @@ def synthesize_text(args: argparse.Namespace) -> int:
         model_name=args.model,
         model_dir=args.model_dir,
         language=args.language,
+        voice=args.voice,
         speed=args.speed,
         sample_rate=args.sample_rate,
         enable_log=not args.quiet,
@@ -264,6 +266,7 @@ def _run_tts(
     model_name: str,
     model_dir: Optional[str] = None,
     language: Optional[str] = None,
+    voice: Optional[str] = None,
     speed: Optional[float] = None,
     sample_rate: Optional[int] = None,
     enable_log: bool = True,
@@ -277,6 +280,7 @@ def _run_tts(
     request = SynthesisRequest(
         text=text,
         language=TTSLanguage(language) if language else None,
+        voice=voice,
         speed=speed,
         sample_rate=sample_rate,
     )
