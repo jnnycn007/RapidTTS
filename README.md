@@ -101,6 +101,10 @@ rapidtts text "你好，RapidTTS" outputs/zm_009.wav --model kokoro_onnx --voice
 - [melotts-onnx](https://pypi.org/project/melotts-onnx/)
 - [wetext](https://github.com/pengzhendong/wetext)
 
+## Star history
+
+[![Stargazers over time](https://starchart.cc/RapidAI/RapidTTS.svg?variant=adaptive)](https://starchart.cc/RapidAI/RapidTTS)
+
 ## License
 
 Apache-2.0 License。
